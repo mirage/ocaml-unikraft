@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Samuel Hym, Tarides <samuel@tarides.com>
+
+CONFIG_LIBUKDEBUG=y
+CONFIG_LIBUKDEBUG_PRINTD=y

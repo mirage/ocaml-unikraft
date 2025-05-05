@@ -1,0 +1,11 @@
+(executable
+ (name hello)
+ (flags :standard -cclib "-z unikraft-backend=qemu")
+ (foreign_stubs
+  (language c)
+  (flags :standard -z unikraft-backend=qemu)
+  (names startup)))
+
+(alias
+ (name default)
+ (deps _build/unikraft/hello.exe))

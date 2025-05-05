@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Samuel Hym, Tarides <samuel@tarides.com>
+
+spec: v0.6
+
+name: dummykernel
+
+unikraft: stable
+
+libraries:
+  musl: stable
+
+targets:
+- qemu/x86_64
+- qemu/arm64
+- fc/x86_64
+- fc/arm64
+- xen/x86_64
+- xen/arm64

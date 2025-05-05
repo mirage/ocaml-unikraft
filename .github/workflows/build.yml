@@ -1,0 +1,153 @@
+name: Build and test
+
+on: [push, pull_request]
+
+# env:
+#   OPAMVERBOSE: 3
+
+jobs:
+  test:
+    name: Run examples on both architectures
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install OCaml compiler
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 5.3.0
+      - name: Pin and install Unikraft
+        run: |
+          sed 's/version:.*/version: "dev"/' unikraft.0.18.0.opin > o
+          OPAMEDITOR="cp o" opam pin add --edit -y unikraft - < /dev/null
+      - name: Install extra packages
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y qemu-system-x86 qemu-system-arm
+          opam install dune
+      - name: Install arch-specific packages
+        run: |
+          opam install                                \
+            ocaml-unikraft-x86_64                     \
+            ocaml-unikraft-backend-qemu-x86_64        \
+            ocaml-unikraft-backend-firecracker-x86_64 \
+            ocaml-unikraft-arm64                      \
+            ocaml-unikraft-backend-qemu-arm64         \
+            ocaml-unikraft-backend-firecracker-arm64
+      - name: Show configuration
+        run: |
+          opam exec -- ocamlc -config
+          opam config list
+          opam list
+      - name: Install default packages
+        run: |
+          opam install                    \
+            ocaml-unikraft                \
+            ocaml-unikraft-default-arm64  \
+            ocaml-unikraft-backend-qemu   \
+            ocaml-unikraft-backend-firecracker
+      - name: Show toolchain configuration
+        run: |
+          opam exec -- ocamlfind -toolchain unikraft ocamlc -config
+      - name: Test examples
+        run: |
+          cd examples/simple/
+          opam exec -- dune build
+          cd ../all/
+          opam exec -- dune runtest
+      - name: Install the other default packages
+        run: |
+          opam install ocaml-unikraft-default-x86_64
+      - name: Show configuration
+        run: |
+          opam exec -- ocamlfind -toolchain unikraft ocamlc -config
+      - name: Test examples
+        run: |
+          cd examples/all/
+          opam exec -- dune runtest
+
+  mirage:
+    name: Build and test a MirageOS network unikernel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Checkout skeleton code
+        uses: actions/checkout@v4
+        with:
+          repository: mirage/mirage-skeleton
+          path: skeleton
+      - name: Install OCaml compiler
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 5.3.0
+          opam-repositories: |
+            overlays: https://github.com/Firobe/mirage-unikraft-overlays.git
+            default: https://github.com/ocaml/opam-repository.git
+          # We need to pin our packages with their real version numbers, to
+          # satisfy the dependency bounds of the other packages
+          opam-pin: false
+      - name: Pin necessary packages
+        run: |
+          opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.0.18.0 .
+          opam pin add -yn ocaml-unikraft-backend-qemu.1.0.0 .
+          opam pin add -yn ocaml-unikraft-default-x86_64.1.0.0 .
+          opam pin add -yn ocaml-unikraft-option-debug.0.18.0 .
+          opam pin add -yn ocaml-unikraft-option-lwip.0.18.0 .
+          opam pin add -yn ocaml-unikraft-option-ocaml-net-stack.0.18.0 .
+          opam pin add -yn ocaml-unikraft-toolchain-x86_64.1.0.0 .
+          opam pin add -yn ocaml-unikraft-x86_64.1.0.0 .
+          opam pin add -yn ocaml-unikraft.1.0.0 .
+      - name: Install packages
+        run: |
+          opam install                    \
+            ocaml-unikraft-default-x86_64 \
+            ocaml-unikraft-backend-qemu   \
+            ocaml-unikraft                \
+            mirage
+      - name: Show configuration
+        run: |
+          opam exec -- ocamlc -config
+          opam config list
+          opam list
+      - name: Show toolchain configuration
+        run: |
+          opam exec -- ocamlfind -toolchain unikraft ocamlc -config
+      - name: Build skeleton
+        run: |
+          set -x
+          cd skeleton/device-usage/network/
+          opam exec -- mirage configure -t unikraft-qemu
+          opam exec -- make
+      - name: Install QEMU
+        run: |
+          sudo apt-get install -y qemu-system-x86
+      - name: Test skeleton
+        run: |
+          set -x
+          sudo ip link add br0 type bridge
+          sudo ip tuntap add dev tap0 mode tap
+          sudo ip link set dev tap0 master br0
+          sudo ip addr add 10.0.0.1/24 dev br0
+          sudo ip link set dev br0 up
+          sudo ip link set dev tap0 up
+          cd skeleton/device-usage/network/
+          (sleep 20s; pkill 'qemu-system.*') &
+          echo "echo Failure; false" > res
+          (set +e;                                      \
+            sleep 8s;                                   \
+            r1=0; r2=0;                                 \
+            curl -fsS 10.0.0.2:8080 || r1=$?;           \
+            sleep 1s;                                   \
+            curl -fsS 10.0.0.2:8080 || r2=$?;           \
+            set +x;                                     \
+            case "$r1,$r2" in                           \
+              52,52) echo "echo Success; true" > res ;; \
+            esac ) &
+          qemu-system-x86_64 -nographic -nodefaults -serial stdio -machine q35 \
+            -cpu "qemu64,-vmx,-svm,+x2apic,+pdpe1gb,+rdrand,+rdseed" -m 1G     \
+            -netdev tap,id=hnet0,ifname=tap0,vhost=off,script=no,downscript=no \
+            -device virtio-net-pci,netdev=hnet0,id=net0                        \
+            -kernel dist/network.qemu -append "-l debug --ipv4-only=true"
+          set +x
+          eval "$(cat res)"

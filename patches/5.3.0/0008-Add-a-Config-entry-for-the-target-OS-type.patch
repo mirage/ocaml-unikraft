@@ -1,0 +1,196 @@
+From ddf39e7e09d03f5e83c92b6bb1bc094e8f116a66 Mon Sep 17 00:00:00 2001
+From: Samuel Hym <samuel@tarides.com>
+Date: Fri, 19 Jul 2024 11:33:29 +0200
+Subject: [PATCH 08/21] Add a `Config` entry for the target OS type
+
+Define `Config.target_os_type` so that:
+
+- the `%ostype_*` primitives correspond to the target OS type rather
+  than the host OS one,
+- the default executable name is the expected default of the target
+  platform.
+
+Need bootstrap
+---
+ .depend                                  |   4 ++++
+ configure                                | Bin 705055 -> 705096 bytes
+ configure.ac                             |   2 ++
+ middle_end/closure/closure.ml            |   6 +++---
+ middle_end/flambda/closure_conversion.ml |   9 ++++++---
+ utils/config.common.ml.in                |   4 ++--
+ utils/config.fixed.ml                    |   2 ++
+ utils/config.generated.ml.in             |   1 +
+ utils/config.mli                         |   6 ++++++
+ 9 files changed, 26 insertions(+), 8 deletions(-)
+
+diff --git a/.depend b/.depend
+index ad3238204d..4ad235142e 100644
+--- a/.depend
++++ b/.depend
+@@ -4951,6 +4951,7 @@ middle_end/closure/closure.cmo : \
+     typing/env.cmi \
+     lambda/debuginfo.cmi \
+     middle_end/convert_primitives.cmi \
++    utils/config.cmi \
+     middle_end/compilenv.cmi \
+     utils/clflags.cmi \
+     middle_end/clambda_primitives.cmi \
+@@ -4973,6 +4974,7 @@ middle_end/closure/closure.cmx : \
+     typing/env.cmx \
+     lambda/debuginfo.cmx \
+     middle_end/convert_primitives.cmx \
++    utils/config.cmx \
+     middle_end/compilenv.cmx \
+     utils/clflags.cmx \
+     middle_end/clambda_primitives.cmx \
+@@ -5162,6 +5164,7 @@ middle_end/flambda/closure_conversion.cmo : \
+     middle_end/flambda/flambda.cmi \
+     lambda/debuginfo.cmi \
+     middle_end/convert_primitives.cmi \
++    utils/config.cmi \
+     middle_end/compilation_unit.cmi \
+     middle_end/flambda/base_types/closure_origin.cmi \
+     middle_end/flambda/base_types/closure_id.cmi \
+@@ -5190,6 +5193,7 @@ middle_end/flambda/closure_conversion.cmx : \
+     middle_end/flambda/flambda.cmx \
+     lambda/debuginfo.cmx \
+     middle_end/convert_primitives.cmx \
++    utils/config.cmx \
+     middle_end/compilation_unit.cmx \
+     middle_end/flambda/base_types/closure_origin.cmx \
+     middle_end/flambda/base_types/closure_id.cmx \
+diff --git a/configure b/configure
+index 8e8f2351c65874ed71a60f10a88584157cb6b08a..096254161c901921c4ad0f6c1d4d867fce7fc452 100755
+GIT binary patch
+delta 111
+zcmbQ=qJ5%8d&B#1zLLbE^wg60{NnhM%7WD9cj4RLg){Q1wEwDR1Y#y2W(HywAZ7((
+sw(Y;F*}rH>pz5+!Qpqm{X;+&5a5aZ#yV-JfAm#vK&h2K)xn4>E01?+Png9R*
+
+delta 71
+zcmX@nqCLMwd&B$i=6~Va|AjO1sI+s}Faj|X5HkZY3lOscG23?T8urgx)4A7hc(lha
+RX9r>qAm-d2zntr(6aeO58p8kp
+
+diff --git a/configure.ac b/configure.ac
+index ea5fa86609..a77eeb5883 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -143,6 +143,7 @@ AC_SUBST([arch_specific_SOURCES])
+ AC_SUBST([arch64])
+ AC_SUBST([model])
+ AC_SUBST([system])
++AC_SUBST([target_os_type])
+ AC_SUBST([bytecode_cflags])
+ AC_SUBST([bytecode_cppflags])
+ AC_SUBST([native_cflags])
+@@ -1621,6 +1622,7 @@ AS_IF([$natdynlink],
+   [natdynlink_archive=""])
+ 
+ AC_DEFINE_UNQUOTED([OCAML_OS_TYPE], ["$ostype"])
++target_os_type="$ostype"
+ 
+ AS_IF([$cross_compiler],
+   [AC_CHECK_TARGET_TOOL([DIRECT_LD],[ld],[false])],
+diff --git a/middle_end/closure/closure.ml b/middle_end/closure/closure.ml
+index 880773fbac..b78feab118 100644
+--- a/middle_end/closure/closure.ml
++++ b/middle_end/closure/closure.ml
+@@ -1058,9 +1058,9 @@ let rec close ({ backend; fenv; cenv ; mutable_vars } as env) lam =
+         | Word_size -> make_const_int (8*B.size_int)
+         | Int_size -> make_const_int (8*B.size_int - 1)
+         | Max_wosize -> make_const_int ((1 lsl ((8*B.size_int) - 10)) - 1 )
+-        | Ostype_unix -> make_const_bool (Sys.os_type = "Unix")
+-        | Ostype_win32 -> make_const_bool (Sys.os_type = "Win32")
+-        | Ostype_cygwin -> make_const_bool (Sys.os_type = "Cygwin")
++        | Ostype_unix -> make_const_bool (Config.target_os_type = "Unix")
++        | Ostype_win32 -> make_const_bool (Config.target_os_type = "Win32")
++        | Ostype_cygwin -> make_const_bool (Config.target_os_type = "Cygwin")
+         | Backend_type ->
+             make_const_int 0 (* tag 0 is the same as Native here *)
+       in
+diff --git a/middle_end/flambda/closure_conversion.ml b/middle_end/flambda/closure_conversion.ml
+index 6b9e8d9670..3e8d88bf52 100644
+--- a/middle_end/flambda/closure_conversion.ml
++++ b/middle_end/flambda/closure_conversion.ml
+@@ -397,9 +397,12 @@ let rec close t env (lam : Lambda.lambda) : Flambda.t =
+         | Int_size -> lambda_const_int (8*Backend.size_int - 1)
+         | Max_wosize ->
+             lambda_const_int ((1 lsl ((8*Backend.size_int) - 10)) - 1)
+-        | Ostype_unix -> lambda_const_bool (String.equal Sys.os_type "Unix")
+-        | Ostype_win32 -> lambda_const_bool (String.equal Sys.os_type "Win32")
+-        | Ostype_cygwin -> lambda_const_bool (String.equal Sys.os_type "Cygwin")
++        | Ostype_unix ->
++            lambda_const_bool (String.equal Config.target_os_type "Unix")
++        | Ostype_win32 ->
++            lambda_const_bool (String.equal Config.target_os_type "Win32")
++        | Ostype_cygwin ->
++            lambda_const_bool (String.equal Config.target_os_type "Cygwin")
+         | Backend_type ->
+             Lambda.const_int 0 (* tag 0 is the same as Native *)
+         end
+diff --git a/utils/config.common.ml.in b/utils/config.common.ml.in
+index 3603fe6c60..bd74c06504 100644
+--- a/utils/config.common.ml.in
++++ b/utils/config.common.ml.in
+@@ -58,7 +58,7 @@ let max_young_wosize = 256
+ let stack_threshold = 32 (* see runtime/caml/config.h *)
+ let stack_safety_margin = 6
+ let default_executable_name =
+-  match Sys.os_type with
++  match target_os_type with
+     "Unix" -> "a.out"
+   | "Win32" | "Cygwin" -> "camlprog.exe"
+   | _ -> "camlprog"
+@@ -105,7 +105,7 @@ let configuration_variables () =
+   p "ext_asm" ext_asm;
+   p "ext_lib" ext_lib;
+   p "ext_dll" ext_dll;
+-  p "os_type" Sys.os_type;
++  p "os_type" target_os_type;
+   p "default_executable_name" default_executable_name;
+   p_bool "systhread_supported" systhread_supported;
+   p "host" host;
+diff --git a/utils/config.fixed.ml b/utils/config.fixed.ml
+index 807b929355..fd11c8fb04 100644
+--- a/utils/config.fixed.ml
++++ b/utils/config.fixed.ml
+@@ -57,6 +57,8 @@ let tsan = false
+ let architecture = "none"
+ let model = "default"
+ let system = "unknown"
++let target_os_type =
++  "The boot compiler should not be using Config.target_os_type"
+ let asm = boot_cannot_call "the assembler"
+ let asm_cfi_supported = false
+ let with_frame_pointers = false
+diff --git a/utils/config.generated.ml.in b/utils/config.generated.ml.in
+index aa03455409..0401e57c93 100644
+--- a/utils/config.generated.ml.in
++++ b/utils/config.generated.ml.in
+@@ -70,6 +70,7 @@ let native_compiler = @native_compiler@
+ let architecture = {@QS@|@arch@|@QS@}
+ let model = {@QS@|@model@|@QS@}
+ let system = {@QS@|@system@|@QS@}
++let target_os_type = {@QS@|@target_os_type@|@QS@}
+ 
+ let asm = {@QS@|@AS@|@QS@}
+ let asm_cfi_supported = @asm_cfi_supported@
+diff --git a/utils/config.mli b/utils/config.mli
+index 51e31a3729..df133343c3 100644
+--- a/utils/config.mli
++++ b/utils/config.mli
+@@ -163,6 +163,12 @@ val model: string
+ val system: string
+ (** Name of operating system for the native-code compiler *)
+ 
++val target_os_type: string
++(** Operating system targetted by the native-code compiler. One of
++-  ["Unix"] (for all Unix versions, including Linux and macOS),
++-  ["Win32"] (for MS-Windows, OCaml compiled with MSVC++ or MinGW-w64),
++-  ["Cygwin"] (for MS-Windows, OCaml compiled with Cygwin). *)
++
+ val asm: string
+ (** The assembler (and flags) to use for assembling
+     ocamlopt-generated code. *)
+-- 
+2.47.2
+

@@ -1,0 +1,65 @@
+; SPDX-License-Identifier: MIT
+; Copyright (c) 2025 Samuel Hym, Tarides <samuel@tarides.com>
+
+(executable
+ (name generator)
+ (modules generator)
+ (libraries compiler-libs.common))
+
+(rule
+ (alias runtest)
+ (mode promote)
+ (action
+  (with-stdout-to
+   dune.inc
+   (run ./generator.exe dune.inc))))
+
+(include dune.inc)
+
+; Wrap the simple startup.c in a library so that it can be shared among all the
+; examples
+(library
+ (name unikraftstartup)
+ (modules)
+ (foreign_stubs
+  (language c)
+  (flags
+   :standard
+   (:include "c_flags"))
+  (names startup)))
+
+(rule
+ (enabled_if
+  (= %{context_name} unikraft))
+ (action
+  (write-file
+   "flags"
+   "(-cclib \"-z unikraft-backend=%{env:UNIKRAFTBACKEND=qemu}\")")))
+
+(rule
+ (enabled_if
+  (<> %{context_name} unikraft))
+ (action
+  (write-file "flags" "()")))
+
+(rule
+ (enabled_if
+  (= %{context_name} unikraft))
+ (action
+  (write-file
+   "c_flags"
+   "(-z unikraft-backend=%{env:UNIKRAFTBACKEND=qemu})")))
+
+(rule
+ (enabled_if
+  (<> %{context_name} unikraft))
+ (action
+  (write-file "c_flags" "()")))
+
+(rule
+ (deps
+  (env_var CI))
+ (action
+  (with-stdout-to
+   qemu-call
+   (run ./generator.exe qemu-call %{architecture}))))

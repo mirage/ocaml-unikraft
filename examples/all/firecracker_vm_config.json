@@ -1,0 +1,23 @@
+{
+  "boot-source": {
+    "kernel_image_path": "main.exe",
+    "boot_args": "main.exe default",
+    "initrd_path": null
+  },
+  "drives": [],
+  "machine-config": {
+    "vcpu_count": 1,
+    "mem_size_mib": 32,
+    "smt": false,
+    "track_dirty_pages": false,
+    "huge_pages": "None"
+  },
+  "cpu-config": null,
+  "balloon": null,
+  "network-interfaces": [],
+  "vsock": null,
+  "logger": null,
+  "metrics": null,
+  "mmds-config": null,
+  "entropy": null
+}

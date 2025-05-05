@@ -1,0 +1,7 @@
+/ocaml/
+_build
+/*.tar.gz
+/*.zip
+/*.install
+# Configurations
+*.old

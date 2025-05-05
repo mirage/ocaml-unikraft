@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Samuel Hym, Tarides <samuel@tarides.com>
+
+CONFIG_UK_NAME="dummykernel"
+
+CONFIG_DEBUG_SYMBOLS_LVL2=y
+
+CONFIG_LIBPOSIX_ENVIRON_ENVP1="OCAMLRUNPARAM=d=1"
+CONFIG_LIBPOSIX_ENVIRON_ENVP1_NOTEMPTY=y

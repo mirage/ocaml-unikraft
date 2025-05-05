@@ -1,0 +1,63 @@
+From 17c038723eeb6a63de43b7823c55963788e96a7b Mon Sep 17 00:00:00 2001
+From: Samuel Hym <samuel@tarides.com>
+Date: Mon, 26 Feb 2024 11:51:11 +0100
+Subject: [PATCH 21/21] Allow `ocaml` in a triplet target to build freestanding
+ cross compilers
+
+Allow `ocaml` to be used as the last component of the target triplet in
+case we are using a custom toolchain for a freestanding target. The
+target triplet is then temporarily rewritten to "<arch>-none" to compute
+the canonical target.
+
+This allows to use a `*-*-ocaml-` prefixes (ie `x86_64-solo5-ocaml-`) to
+create cross-compiler toolchains dedicated to specific freestanding
+targets
+---
+ configure    | Bin 710464 -> 710951 bytes
+ configure.ac |  13 +++++++++++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/configure b/configure
+index 1cf37f2821059a6557ab4c222ca3411edbc85030..c44455f99a8cb5c258bbe2ba1cf380bb75bd8b77 100755
+GIT binary patch
+delta 522
+zcmZ8dJx@Y06wOoodW#d2%e9ao;B#;>Q7~~(<7jjz*HWNKX-Qi|BMEK}E=)4`1Kb>p
+zk=1|XU-0%l5{2QUxu?D7qu=k<w~y-MXH*+bkA_isb5wv6rOW`B;n-CSyn!15eJ7fL
+z4tz&|Lg#^-ZqI0;J(yO?dbDlf!CTo=bV>~zornuC5P&u)NZkem-gn+~N!BRdL3-9Q
+zmgtrh!g<uAW_Xr~?ZLHyrU7Smg9T|VnouA?IV@VK?!k(ImEH>-LbDoL-Z@S*rA%9d
+z#C<PjN*w7za#S<T*x{{ccsva)8mJ_?IxA*=*~sEh2<Es@v#=8bRFX=Pepnd}X`KAn
+zIDZLnaduTNB_(129R14O{Cdj&_aMvtEOB}j){Dp+X*L=r__ek*VK33a^z}J<$Zap|
+h&N}>6U{CpRL|7s$6LN$V!YW~nuuj;R=ErgM{1-oCuuuR1
+
+delta 70
+zcmZ3!N&CP$?S?IkHZ|LAYZx{7r=M+SG~b@k%UI3Q{&ylH5HkTWGZ2ILtU$~L#Oy%K
+O0mPi!|4!u6at8olN+6^F
+
+diff --git a/configure.ac b/configure.ac
+index 7d55a3bcea..b2377a5431 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -300,7 +300,20 @@ AC_CONFIG_COMMANDS_PRE(OCAML_QUOTED_STRING_ID)
+ 
+ AC_CANONICAL_BUILD
+ AC_CANONICAL_HOST
++# Allow "ocaml" to be used as the last component of the target triplet in case
++# we are using a custom toolchain for a freestanding target. To do so, the
++# target triplet is temporarily rewritten to "<arch>-none" to compute the
++# canonical target
++save_target_alias="$target_alias"
++AS_CASE([$target_alias],
++  [*-*-ocaml],
++    [ac_save_IFS=$IFS
++    IFS='-'
++    set x $target_alias
++    target_alias="$2-none"
++    IFS=$ac_save_IFS])
+ AC_CANONICAL_TARGET
++target_alias="$save_target_alias"
+ 
+ # Override cross_compiling and ac_tool_prefix variables since the C toolchain is
+ # used to generate target code when building a cross compiler
+-- 
+2.47.2
+
