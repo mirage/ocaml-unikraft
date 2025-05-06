@@ -23,7 +23,7 @@ build: [
   [
     make
     "-j%{jobs}%"
-    "UNIKRAFT=%{lib}%/unikraft"
+    "UNIKRAFT=%{unikraft:lib}%"
     "OCUKPLAT=firecracker"
     "OCUKARCH=arm64"
     "OCUKEXTLIBS=musl"

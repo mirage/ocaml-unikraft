@@ -22,7 +22,7 @@ build: [
   [
     make
     "-j%{jobs}%"
-    "UNIKRAFT=%{lib}%/unikraft"
+    "UNIKRAFT=%{unikraft:lib}%"
     "OCUKPLAT=qemu"
     "OCUKARCH=x86_64"
     "OCUKEXTLIBS=musl"

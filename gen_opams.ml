@@ -139,7 +139,7 @@ depends: [
 ]
 install: [
   ["rm" "-rf" ".github" ".gitignore"]
-  ["cp" "-r" "." "%%{lib}%%/unikraft"]
+  ["cp" "-r" "." "%%{unikraft:lib}%%"]
 ]
 dev-repo: "git+https://github.com/unikraft/unikraft.git"
 patches: [ "strong-main.patch" "ibm-vs-arm.patch" ]
@@ -205,7 +205,7 @@ build: [
   [
     make
     "-j%%{jobs}%%"
-    "UNIKRAFT=%%{lib}%%/unikraft"
+    "UNIKRAFT=%%{unikraft:lib}%%"
     "OCUKPLAT=%s"
     "OCUKARCH=%s"
     "OCUKEXTLIBS=musl"
