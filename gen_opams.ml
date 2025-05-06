@@ -25,7 +25,20 @@ let _ =
         Arg.Set repository_layout,
         "Use the standard opam-repository layout (packages/...)" );
     ]
-    url_and_checksum "gen_opams [-r]"
+    url_and_checksum "gen_opams [-r]";
+  match (!repository_layout, !url) with
+  | true, None ->
+      Printf.eprintf
+        "Warning: packages are generated in a repository layout but with `url` \
+         missing.\n"
+  | false, Some _ ->
+      Printf.eprintf
+        {|Warning: the `url` field is ignored in package descriptions in source
+repositories (ie not from the `opam-repository`).
+Generating packages with `url` fields but not in a opam-repository-like
+layout (see `-r`) nevertheless.
+|}
+  | _, _ -> ()
 
 let version_ocaml_unikraft = "1.0.0"
 let version_unikraft = "0.18.0"
