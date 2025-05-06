@@ -210,6 +210,7 @@ build: [
     "OCUKARCH=%s"
     "OCUKEXTLIBS=musl"
     "OCUKCONFIGOPTS+=debug" {ocaml-unikraft-option-debug:installed}
+    "UK_CFLAGS=-std=gnu17"
     "%%{name}%%.install"
   ]
 ]
