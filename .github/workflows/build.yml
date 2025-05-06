@@ -90,12 +90,10 @@ jobs:
       - name: Pin necessary packages
         run: |
           opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.0.18.0 .
-          opam pin add -yn ocaml-unikraft-backend-qemu.1.0.0 .
+          opam pin add -yn ocaml-unikraft-backend-qemu.0.18.0 .
           opam pin add -yn ocaml-unikraft-default-x86_64.1.0.0 .
           opam pin add -yn ocaml-unikraft-option-debug.0.18.0 .
-          opam pin add -yn ocaml-unikraft-option-lwip.0.18.0 .
-          opam pin add -yn ocaml-unikraft-option-ocaml-net-stack.0.18.0 .
-          opam pin add -yn ocaml-unikraft-toolchain-x86_64.1.0.0 .
+          opam pin add -yn ocaml-unikraft-toolchain-x86_64.0.18.0 .
           opam pin add -yn ocaml-unikraft-x86_64.1.0.0 .
           opam pin add -yn ocaml-unikraft.1.0.0 .
       - name: Install packages
