@@ -95,6 +95,63 @@ tags: "org:mirage"|};
 x-maintenance-intent: ["(latest)"]
 |})
 
+let unikraft_package () =
+  (* only when generating a repository layout *)
+  if !repository_layout then
+    let filename =
+      Filename.concat
+        (mkdir_p
+           [
+             "packages";
+             "unikraft";
+             Printf.sprintf "unikraft.%s" version_unikraft;
+           ])
+        "opam"
+    in
+    Out_channel.with_open_bin filename (fun out ->
+        Printf.fprintf out
+          {|opam-version: "2.0"
+synopsis: "Unikraft sources"
+description: "Source package for Unikraft"
+maintainer: "samuel@tarides.com"
+authors: "Unikraft contributors"
+license: ["BSD-3-Clause" "MIT" "GPL-2.0"]
+homepage: "https://unikraft.org"
+bug-reports: "https://github.com/mirage/ocaml-unikraft/issues"
+tags: "org:mirage"
+depends: [
+    "conf-bison"
+    "conf-flex"
+    "conf-python-3"
+]
+install: [
+  ["rm" "-rf" ".github" ".gitignore"]
+  ["cp" "-r" "." "%%{lib}%%/unikraft"]
+]
+dev-repo: "git+https://github.com/unikraft/unikraft.git"
+patches: [ "strong-main.patch" "ibm-vs-arm.patch" ]
+url {
+  src:
+    "https://github.com/unikraft/unikraft/archive/refs/tags/RELEASE-0.18.0.tar.gz"
+  checksum:
+    "sha256=680836d192e69167c3ce8c19892d5440c63885308aed0f40764d1ed42ed1f8e5"
+}
+extra-source "strong-main.patch" {
+  src:
+    "https://raw.githubusercontent.com/shym/unikraft/refs/heads/patches/strong-main.patch"
+  checksum:
+    "sha256=0889759befcc6a0cd350ac49d6356133393de59188173bffb4f37ca4c7f007a3"
+}
+extra-source "ibm-vs-arm.patch" {
+  src:
+    "https://raw.githubusercontent.com/shym/unikraft/refs/heads/patches/ibm-vs-arm.patch"
+  checksum:
+    "sha256=484043e9fd9afe09416155644a7d1d7cd92a5eff2563ce98c95db37cea00869e"
+}
+available: os = "linux"
+x-maintenance-intent: ["(latest)"]
+|})
+
 let backend_package arch backend =
   let short_name, long_name = backend in
   let package_name =
@@ -309,6 +366,7 @@ depends: ["ocaml-unikraft-default-x86_64" | "ocaml-unikraft-default-arm64"]
 |})
 
 let _ =
+  unikraft_package ();
   List.iter (fun arch -> List.iter (backend_package arch) backends) archs;
   List.iter option_package options;
   List.iter toolchain_package archs;
