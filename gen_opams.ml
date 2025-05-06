@@ -90,7 +90,10 @@ tags: "org:mirage"|};
 |}
             src checksum);
       if !repository_layout then
-        Printf.fprintf out "x-maintenance-intent: [\"(latest)\"]\n")
+        Printf.fprintf out
+          {|available: os = "linux"
+x-maintenance-intent: ["(latest)"]
+|})
 
 let backend_package arch backend =
   let short_name, long_name = backend in

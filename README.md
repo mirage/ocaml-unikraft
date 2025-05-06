@@ -49,6 +49,11 @@ The supported backends at the moment are:
 [QEMU]: https://www.qemu.org/
 [Firecracker]: https://firecracker-microvm.github.io/
 
+Unikraft’s build system works on Linux. In our tests, builds under FreeBSD and
+macOS fail (even when setting explicitly some make variables such as `SED`,
+`COMPILER`, etc. on FreeBSD). Please [contribute](#contributions) if you manage
+to build on other OSes.
+
 
 ## Installation
 
