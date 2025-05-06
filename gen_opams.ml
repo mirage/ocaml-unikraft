@@ -4,6 +4,11 @@
 
 (* OCaml script to generate all the *.opam files *)
 
+let version_ocaml_unikraft = "1.0.0"
+let version_unikraft = "0.18.0"
+
+(**)
+
 let repository_layout = ref false
 let url = ref None
 
@@ -40,8 +45,6 @@ layout (see `-r`) nevertheless.
 |}
   | _, _ -> ()
 
-let version_ocaml_unikraft = "1.0.0"
-let version_unikraft = "0.18.0"
 let archs = [ "arm64"; "x86_64" ]
 let backends = [ ("firecracker", "Firecracker"); ("qemu", "QEMU") ]
 let options = [ ("debug", "debugging", []) ]
@@ -267,7 +270,7 @@ license: "MIT"
 
 let toolchain_package arch =
   let package_name = Printf.sprintf "ocaml-unikraft-toolchain-%s" arch in
-  with_package false package_name version_ocaml_unikraft (fun out ->
+  with_package false package_name version_unikraft (fun out ->
       Printf.fprintf out
         {|
 synopsis:
@@ -349,7 +352,7 @@ build: [
 let default_backend_package backend =
   let short_name, long_name = backend in
   let package_name = Printf.sprintf "ocaml-unikraft-backend-%s" short_name in
-  with_package true package_name version_ocaml_unikraft (fun out ->
+  with_package true package_name version_unikraft (fun out ->
       Printf.fprintf out
         {|
 synopsis:
