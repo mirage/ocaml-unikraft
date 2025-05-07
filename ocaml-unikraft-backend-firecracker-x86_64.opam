@@ -11,12 +11,10 @@ authors: ["Samuel Hym" "Unikraft contributors"]
 license: ["MIT" "BSD-3-Clause" "GPL-2.0-only"]
 depends: [
   "unikraft" {= version}
+  "conf-x86_64-linux-gnu-gcc" {arch != "x86_64"}
 ]
 depopts: [
   "ocaml-unikraft-option-debug"
-]
-depexts: [
-  ["gcc-x86_64-linux-gnu"] {os-family = "debian" & arch != "x86_64"}
 ]
 build: [
   [

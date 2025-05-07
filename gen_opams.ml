@@ -168,6 +168,49 @@ available: os = "linux"
 x-maintenance-intent: ["(latest)"]
 |})
 
+let conf_target_gcc_package arch =
+  (* only when generating a repository layout *)
+  let version = "1" and pfx_arch = prefix_arch arch in
+  let cmd = Printf.sprintf "%s-linux-gnu-gcc" pfx_arch in
+  if !repository_layout then
+    let filename =
+      Filename.concat
+        (mkdir_p
+           [
+             "packages";
+             Printf.sprintf "conf-%s" cmd;
+             Printf.sprintf "conf-%s.%s" cmd version;
+           ])
+        "opam"
+    in
+    Out_channel.with_open_bin filename (fun out ->
+        Printf.fprintf out
+          {|opam-version: "2.0"
+synopsis: "Virtual package relying on the %s compiler (for C)"
+description:
+  "This package can only install if the %s compiler is installed on the system (whether this is a cross compiler or not)."
+maintainer: "samuel@tarides.com"
+authors: ["Samuel Hym"]
+license: "GPL-2.0-or-later"
+homepage: "https://github.com/ocaml/opam-repository"
+bug-reports: "https://github.com/ocaml/opam-repository/issues"
+flags: conf
+build: [%S "--version"]
+depexts: [
+  ["gcc-%s-linux-gnu"] {os-family = "debian" | os-family = "fedora"}
+  ["cross-%s-gcc14"] {os-family = "suse"}|}
+          cmd cmd cmd pfx_arch pfx_arch;
+        (match arch with
+        | "arm64" ->
+            Printf.fprintf out {|
+  ["%s-linux-gnu-gcc"] {os-family = "arch"}|}
+              pfx_arch
+        | _ -> () (* No cross compiler to x86_64 packaged in aarch64 Arch *));
+        Printf.fprintf out {|
+]
+x-maintenance-intent: ["(latest)"]
+|})
+
 let backend_package arch backend =
   let short_name, long_name = backend in
   let package_name =
@@ -181,26 +224,14 @@ authors: ["Samuel Hym" "Unikraft contributors"]
 license: ["MIT" "BSD-3-Clause" "GPL-2.0-only"]
 depends: [
   "unikraft" {= version}
+  "conf-%s-linux-gnu-gcc" {arch != "%s"}
 ]
 depopts: [|}
-        long_name arch;
+        long_name arch (prefix_arch arch) arch;
       List.iter
         (fun (opt, _, _) ->
           Printf.fprintf out "\n  \"ocaml-unikraft-option-%s\"" opt)
         options;
-      Printf.fprintf out
-        {|
-]
-depexts: [
-  ["gcc-%s-linux-gnu"] {os-family = "debian" & arch != "%s"}|}
-        (prefix_arch arch) arch;
-      (match arch with
-      | "arm64" ->
-          Printf.fprintf out
-            {|
-  ["%s-linux-gnu-gcc"] {os-family = "arch" & arch != "%s"}|}
-            (prefix_arch arch) arch
-      | _ -> () (* No cross compiler to x86_64 packaged in aarch64 Arch *));
       Printf.fprintf out
         {|
 ]
@@ -384,6 +415,7 @@ depends: ["ocaml-unikraft-default-x86_64" | "ocaml-unikraft-default-arm64"]
 
 let _ =
   unikraft_package ();
+  List.iter conf_target_gcc_package archs;
   List.iter (fun arch -> List.iter (backend_package arch) backends) archs;
   List.iter option_package options;
   List.iter toolchain_package archs;
