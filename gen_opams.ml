@@ -131,7 +131,7 @@ synopsis: "Unikraft sources"
 description: "Source package for Unikraft"
 maintainer: "samuel@tarides.com"
 authors: "Unikraft contributors"
-license: ["BSD-3-Clause" "MIT" "GPL-2.0"]
+license: ["BSD-3-Clause" "MIT" "GPL-2.0-or-later" "GPL-2.0-only"]
 homepage: "https://unikraft.org"
 bug-reports: "https://github.com/mirage/ocaml-unikraft/issues"
 tags: "org:mirage"
@@ -142,7 +142,7 @@ depends: [
 ]
 install: [
   ["rm" "-rf" ".github" ".gitignore"]
-  ["cp" "-r" "." "%%{unikraft:lib}%%"]
+  ["cp" "-r" "." "%%{_:lib}%%"]
 ]
 dev-repo: "git+https://github.com/unikraft/unikraft.git"
 patches: [ "strong-main.patch" "ibm-vs-arm.patch" ]
@@ -164,7 +164,10 @@ extra-source "ibm-vs-arm.patch" {
   checksum:
     "sha256=484043e9fd9afe09416155644a7d1d7cd92a5eff2563ce98c95db37cea00869e"
 }
-available: os = "linux"
+available:
+  os = "linux" &
+  (arch = "arm64" | arch = "x86_64" | arch = "s390x" | arch = "riscv64" |
+   arch = "ppc64")
 x-maintenance-intent: ["(latest)"]
 |})
 
