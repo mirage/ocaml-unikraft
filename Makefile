@@ -61,17 +61,11 @@ all: compiler
 LIBMUSL := _build/libs/musl
 MUSLARCHIVE := $(wildcard musl-*.tar.gz)
 MUSLARCHIVEPATH := $(BEBLDLIBDIR)/libmusl/$(MUSLARCHIVE)
-LIBLWIP := _build/libs/lwip
-LWIPARCHIVE := $(wildcard lwip-*.zip)
-LWIPARCHIVEPATH := $(BEBLDLIBDIR)/liblwip/$(patsubst lwip-%,%,$(LWIPARCHIVE))
 
 OCUKEXTLIBSDEPS := $(addprefix _build/libs/,$(OCUKEXTLIBS))
 OCUKEXTLIBSARCHIVES :=
 ifneq ("$(findstring musl,$(OCUKEXTLIBS))","")
 OCUKEXTLIBSARCHIVES := $(OCUKEXTLIBSARCHIVES) $(MUSLARCHIVEPATH)
-endif
-ifneq ("$(findstring lwip,$(OCUKEXTLIBS))","")
-OCUKEXTLIBSARCHIVES := $(OCUKEXTLIBSARCHIVES) $(LWIPARCHIVEPATH)
 endif
 
 # The suffix has the form `-liba+libb+libc-optx+opty`
@@ -106,10 +100,6 @@ _build/libs/%: lib-%.tar.gz
 	fi
 
 $(MUSLARCHIVEPATH): $(MUSLARCHIVE)
-	mkdir -p $(dir $@)
-	$(HARDLINK) $< $@
-
-$(LWIPARCHIVEPATH): $(LWIPARCHIVE)
 	mkdir -p $(dir $@)
 	$(HARDLINK) $< $@
 
@@ -149,7 +139,7 @@ fullconfig: $(CONFIG)
 fullconfigs:
 	+for p in qemu firecracker; do \
 	  for a in x86_64 arm64; do \
-	    for l in musl "musl lwip"; do \
+	    for l in musl; do \
 	      for o in "" debug; do \
 	        $(MAKE) OCUKPLAT="$$p" OCUKARCH="$$a" OCUKEXTLIBS="$$l" \
 	          OCUKCONFIGOPTS="$$o" fullconfig ; \
