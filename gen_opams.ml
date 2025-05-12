@@ -146,29 +146,59 @@ install: [
   ["cp" "-r" "." "%%{_:lib}%%"]
 ]
 dev-repo: "git+https://github.com/unikraft/unikraft.git"
-patches: [ "strong-main.patch" "ibm-vs-arm.patch" ]
 url {
   src:
-    "https://github.com/unikraft/unikraft/archive/refs/tags/RELEASE-0.18.0.tar.gz"
+    "https://github.com/mirage/unikraft/archive/refs/tags/v0.18.0.tar.gz"
   checksum:
-    "sha256=680836d192e69167c3ce8c19892d5440c63885308aed0f40764d1ed42ed1f8e5"
-}
-extra-source "strong-main.patch" {
-  src:
-    "https://raw.githubusercontent.com/shym/unikraft/refs/heads/patches/strong-main.patch"
-  checksum:
-    "sha256=0889759befcc6a0cd350ac49d6356133393de59188173bffb4f37ca4c7f007a3"
-}
-extra-source "ibm-vs-arm.patch" {
-  src:
-    "https://raw.githubusercontent.com/shym/unikraft/refs/heads/patches/ibm-vs-arm.patch"
-  checksum:
-    "sha256=484043e9fd9afe09416155644a7d1d7cd92a5eff2563ce98c95db37cea00869e"
+    "sha256=bea0178b74d1c63fbb64c6c477e12bd01200cd7faa400dcd1114b5b679e274a5"
 }
 available:
   os = "linux" &
   (arch = "arm64" | arch = "x86_64" | arch = "s390x" | arch = "riscv64" |
    arch = "ppc64")
+x-maintenance-intent: ["(latest)"]
+|})
+
+let unikraft_musl_package () =
+  (* only when generating a repository layout *)
+  if !repository_layout then
+    let filename =
+      Filename.concat
+        (mkdir_p
+           [
+             "packages";
+             "unikraft-musl";
+             Printf.sprintf "unikraft-musl.%s" version_unikraft;
+           ])
+        "opam"
+    in
+    Out_channel.with_open_bin filename (fun out ->
+        Printf.fprintf out
+          {|opam-version: "2.0"
+synopsis: "Unikraft's wrapper for musl"
+description: "Source package for the musl wrapper for Unikraft"
+maintainer: "samuel@tarides.com"
+authors: "Unikraft contributors"
+license: ["MIT" "BSD-3-Clause"]
+homepage: "https://unikraft.org"
+bug-reports: "https://github.com/mirage/ocaml-unikraft/issues"
+tags: "org:mirage"
+install: [
+  ["rm" "-rf" ".github"]
+  ["cp" "-r" "." "%%{_:lib}%%"]
+]
+dev-repo: "git+https://github.com/unikraft/lib-musl.git"
+url {
+  src:
+    "https://github.com/mirage/unikraft-lib-musl/archive/refs/tags/v0.18.0.tar.gz"
+  checksum:
+    "sha256=1ef2a96b732a21a591be2bad49f6ccff623564119470e2098d66cc23a225ca29"
+}
+extra-source "musl-1.2.3.tar.gz" {
+  src: "https://www.musl-libc.org/releases/musl-1.2.3.tar.gz"
+  checksum:
+    "sha256=7d5b0b6062521e4627e099e4c9dc8248d32a30285e959b7eecaa780cf8cfd4a4"
+}
 x-maintenance-intent: ["(latest)"]
 |})
 
@@ -228,6 +258,7 @@ authors: ["Samuel Hym" "Unikraft contributors"]
 license: ["MIT" "BSD-3-Clause" "GPL-2.0-only"]
 depends: [
   "unikraft" {= version}
+  "unikraft-musl" {= version}
   "conf-%s-linux-gnu-gcc" {arch != "%s"}
 ]
 depopts: [|}
@@ -244,6 +275,7 @@ build: [
     make
     "-j%%{jobs}%%"
     "UNIKRAFT=%%{unikraft:lib}%%"
+    "UNIKRAFTMUSL=%%{unikraft-musl:lib}%%"
     "OCUKPLAT=%s"
     "OCUKARCH=%s"
     "OCUKEXTLIBS=musl"
@@ -252,35 +284,6 @@ build: [
     "%%{name}%%.install"
   ]
 ]
-extra-source "lib-musl.tar.gz" {
-  src:
-    "https://github.com/unikraft/lib-musl/archive/refs/tags/RELEASE-0.18.0.tar.gz"
-  checksum:
-    "sha256=b51afee0227c0c8c419dd001fb6b6f57b529e5cadcd437afdd05e2e8667a1e2e"
-}
-extra-source "patches/lib-musl/main-tsd.patch" {
-  src:
-    "https://raw.githubusercontent.com/shym/lib-musl/refs/heads/patches/main-tsd.patch"
-  checksum:
-    "sha256=9b87cbf0743492e6949de61af6423b463031da8b14b799a775c34886cabffd28"
-}
-extra-source "patches/lib-musl/arm64.patch" {
-  src:
-    "https://raw.githubusercontent.com/shym/lib-musl/refs/heads/patches/arm64.patch"
-  checksum:
-    "sha256=d83043f534a8da4f0133f4fbde0d78bc3a5d996ca6f7fc91b42ccf2874515514"
-}
-extra-source "patches/lib-musl/exit.patch" {
-  src:
-    "https://raw.githubusercontent.com/shym/lib-musl/refs/heads/patches/exit.patch"
-  checksum:
-    "sha256=41e72b400071b146dde8ecd7be09a4a6187d2ed448ae200581de5405f84db1ee"
-}
-extra-source "musl-1.2.3.tar.gz" {
-  src: "https://www.musl-libc.org/releases/musl-1.2.3.tar.gz"
-  checksum:
-    "sha256=7d5b0b6062521e4627e099e4c9dc8248d32a30285e959b7eecaa780cf8cfd4a4"
-}
 |}
         short_name arch)
 
@@ -419,6 +422,7 @@ depends: ["ocaml-unikraft-default-x86_64" | "ocaml-unikraft-default-arm64"]
 
 let _ =
   unikraft_package ();
+  unikraft_musl_package ();
   List.iter conf_target_gcc_package archs;
   List.iter (fun arch -> List.iter (backend_package arch) backends) archs;
   List.iter option_package options;
