@@ -332,12 +332,11 @@ $(ALLDIRS):
 
 _build/lib/unikraft: | _build/lib
 	@if test "$(UNIKRAFT)" '=' "$$PWD"/$@ ; then \
-	    echo Cannot find Unikraft sources, run: $(MAKE) UNIKRAFT=...; \
-	    exit 1; \
-	else \
-	    echo $(SYMLINK) "$(UNIKRAFT)" $@ ; \
-	    $(SYMLINK) "$(UNIKRAFT)" $@ ; \
+	    echo "Cannot find Unikraft sources;" \
+	        "set UNIKRAFT=... in your $(MAKE) call"; \
+	    false; \
 	fi
+	$(SYMLINK) "$(UNIKRAFT)" $@
 
 # Use curl to download the necessary sources and sha256sum to check their
 # consistency
