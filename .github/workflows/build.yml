@@ -6,8 +6,10 @@ on:
       - '*'
   pull_request:
 
-# env:
-#   OPAMVERBOSE: 3
+env:
+  UKVER: "0.18.0"
+  OCUKVER: "1.0.0"
+  # OPAMVERBOSE: 3
 
 jobs:
   test:
@@ -20,18 +22,34 @@ jobs:
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: 5.3.0
-      - name: Pin Unikraft and conf-*
+          # We need to pin our packages with their real version numbers, to
+          # satisfy the dependency bounds of the other packages
+          opam-pin: false
+      - name: Pin packages
         run: |
+          opam pin add -yn 'https://github.com/mirage/unikraft.git#mirage'
+          opam pin add -yn 'https://github.com/mirage/unikraft-lib-musl.git#mirage'
           opam exec -- ocaml gen_opams.ml -r
-          echo 'version: "dev"' >> packages/unikraft/unikraft.0.18.0/opam
-          OPAMEDITOR="cp packages/unikraft/unikraft.0.18.0/opam" \
-            opam pin add --edit -y unikraft - < /dev/null
-          echo 'version: "dev"' >> packages/conf-aarch64-linux-gnu-gcc/conf-aarch64-linux-gnu-gcc.1/opam
+          echo 'version: "1"' >> packages/conf-aarch64-linux-gnu-gcc/conf-aarch64-linux-gnu-gcc.1/opam
           OPAMEDITOR="cp packages/conf-aarch64-linux-gnu-gcc/conf-aarch64-linux-gnu-gcc.1/opam" \
             opam pin add --edit -yn conf-aarch64-linux-gnu-gcc - < /dev/null
-          echo 'version: "dev"' >> packages/conf-x86_64-linux-gnu-gcc/conf-x86_64-linux-gnu-gcc.1/opam
+          echo 'version: "1"' >> packages/conf-x86_64-linux-gnu-gcc/conf-x86_64-linux-gnu-gcc.1/opam
           OPAMEDITOR="cp packages/conf-x86_64-linux-gnu-gcc/conf-x86_64-linux-gnu-gcc.1/opam" \
             opam pin add --edit -yn conf-x86_64-linux-gnu-gcc - < /dev/null
+          opam pin add -yn ocaml-unikraft.$OCUKVER .
+          opam pin add -yn ocaml-unikraft-arm64.$OCUKVER .
+          opam pin add -yn ocaml-unikraft-backend-firecracker.$UKVER .
+          opam pin add -yn ocaml-unikraft-backend-firecracker-arm64.$UKVER .
+          opam pin add -yn ocaml-unikraft-backend-firecracker-x86_64.$UKVER .
+          opam pin add -yn ocaml-unikraft-backend-qemu.$UKVER .
+          opam pin add -yn ocaml-unikraft-backend-qemu-arm64.$UKVER .
+          opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.$UKVER .
+          opam pin add -yn ocaml-unikraft-default-arm64.$OCUKVER .
+          opam pin add -yn ocaml-unikraft-default-x86_64.$OCUKVER .
+          opam pin add -yn ocaml-unikraft-option-debug.$UKVER .
+          opam pin add -yn ocaml-unikraft-toolchain-arm64.$UKVER .
+          opam pin add -yn ocaml-unikraft-toolchain-x86_64.$UKVER .
+          opam pin add -yn ocaml-unikraft-x86_64.$OCUKVER .
       - name: Install extra packages
         run: |
           sudo apt-get update -y
@@ -101,13 +119,15 @@ jobs:
           opam-pin: false
       - name: Pin necessary packages
         run: |
-          opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.0.18.0 .
-          opam pin add -yn ocaml-unikraft-backend-qemu.0.18.0 .
-          opam pin add -yn ocaml-unikraft-default-x86_64.1.0.0 .
-          opam pin add -yn ocaml-unikraft-option-debug.0.18.0 .
-          opam pin add -yn ocaml-unikraft-toolchain-x86_64.0.18.0 .
-          opam pin add -yn ocaml-unikraft-x86_64.1.0.0 .
-          opam pin add -yn ocaml-unikraft.1.0.0 .
+          opam pin add -yn 'https://github.com/mirage/unikraft.git#mirage'
+          opam pin add -yn 'https://github.com/mirage/unikraft-lib-musl.git#mirage'
+          opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.$UKVER .
+          opam pin add -yn ocaml-unikraft-backend-qemu.$UKVER .
+          opam pin add -yn ocaml-unikraft-default-x86_64.$OCUKVER .
+          opam pin add -yn ocaml-unikraft-option-debug.$UKVER .
+          opam pin add -yn ocaml-unikraft-toolchain-x86_64.$UKVER .
+          opam pin add -yn ocaml-unikraft-x86_64.$OCUKVER .
+          opam pin add -yn ocaml-unikraft.$OCUKVER .
       - name: Install packages
         run: |
           opam install                    \
@@ -131,6 +151,7 @@ jobs:
           opam exec -- make
       - name: Install QEMU
         run: |
+          sudo apt-get update
           sudo apt-get install -y qemu-system-x86
       - name: Test skeleton
         run: |
