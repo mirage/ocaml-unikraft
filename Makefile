@@ -32,11 +32,12 @@ UNIKRAFT ?= $(LIB)/unikraft
 ifeq ("$(filter /%,$(UNIKRAFT))","")
 override UNIKRAFT := $$PWD/$(UNIKRAFT)
 endif
+# Absolute path to the musl wrapper sources for Unikraft
+UNIKRAFTMUSL ?= $(LIB)/unikraft-musl
+ifeq ("$(filter /%,$(UNIKRAFTMUSL))","")
+override UNIKRAFTMUSL := $$PWD/$(UNIKRAFTMUSL)
+endif
 
-# Tar command that extracts an archive stripping the first directory
-UNTARSTRIP := tar -x --strip-components=1
-# Create a hard link
-HARDLINK := ln -f
 # Create a symbolic link
 SYMLINK := ln -sf
 
@@ -59,8 +60,8 @@ all: compiler
 ########################
 
 LIBMUSL := _build/libs/musl
-MUSLARCHIVE := $(wildcard musl-*.tar.gz)
-MUSLARCHIVEPATH := $(BEBLDLIBDIR)/libmusl/$(MUSLARCHIVE)
+MUSLARCHIVE := $(wildcard $(UNIKRAFTMUSL)/musl-*.tar.gz)
+MUSLARCHIVEPATH := $(BEBLDLIBDIR)/libmusl/$(notdir $(MUSLARCHIVE))
 
 OCUKEXTLIBSDEPS := $(addprefix _build/libs/,$(OCUKEXTLIBS))
 OCUKEXTLIBSARCHIVES :=
@@ -92,16 +93,23 @@ $(BACKENDBUILT): $(CONFIG) | $(BEBLDLIBDIR)/Makefile $(LIB)/unikraft \
 	+$(UKMAKE) sub_make_exec=1
 	touch $@
 
-_build/libs/%: lib-%.tar.gz
-	mkdir -p $@
-	$(UNTARSTRIP) -f $< -C $@
-	if test -d "patches/lib-$*" ; then \
-	  git apply --directory=$@ "patches/lib-$*"/*; \
+_build/libs/musl:
+	@if test -z "$(MUSLARCHIVE)" ; then \
+	    echo "Cannot find lib-musl sources;" \
+	        "set UNIKRAFTMUSL=... in your $(MAKE) call"; \
+	    false; \
 	fi
+	mkdir -p $(dir $@)
+	$(SYMLINK) "$(UNIKRAFTMUSL)" $@
 
 $(MUSLARCHIVEPATH): $(MUSLARCHIVE)
+	@if test -z "$<" ; then \
+	    echo "Cannot find lib-musl sources;" \
+	        "set UNIKRAFTMUSL=... in your $(MAKE) call"; \
+	    false; \
+	fi
 	mkdir -p $(dir $@)
-	$(HARDLINK) $< $@
+	cp $< $@
 
 # Enabled only on Linux (requirement of the olddefconfig target) and in
 # development (no need to rebuild the configuration in release)
