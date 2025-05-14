@@ -365,6 +365,7 @@ build: [
 install: [
   [make "install-ocaml"]
 ]
+conflicts: ["ocaml-option-bytecode-only"]
 |}
         arch arch arch arch)
 
