@@ -204,7 +204,16 @@ x-maintenance-intent: ["(latest)"]
 
 let conf_target_gcc_package arch =
   (* only when generating a repository layout *)
-  let version = "1" and pfx_arch = prefix_arch arch in
+  let version = "1"
+  and pfx_arch = prefix_arch arch
+  and deb_arch =
+    (* how the arch appears in the Debian package name, as it’s yet another
+       variant... *)
+    match arch with
+    | "arm64" -> "aarch64"
+    | "x86_64" -> "x86-64"
+    | x -> failwith ("Unsupported arch: " ^ x)
+  in
   let cmd = Printf.sprintf "%s-linux-gnu-gcc" pfx_arch in
   if !repository_layout then
     let filename =
@@ -231,19 +240,16 @@ bug-reports: "https://github.com/ocaml/opam-repository/issues"
 flags: conf
 build: [%S "--version"]
 depexts: [
-  ["gcc-%s-linux-gnu"] {os-family = "debian" | os-family = "fedora"}
-  ["cross-%s-gcc14"] {os-family = "suse"}|}
-          cmd cmd cmd pfx_arch pfx_arch;
-        (match arch with
-        | "arm64" ->
-            Printf.fprintf out {|
-  ["%s-linux-gnu-gcc"] {os-family = "arch"}|}
-              pfx_arch
-        | _ -> () (* No cross compiler to x86_64 packaged in aarch64 Arch *));
-        Printf.fprintf out {|
+  ["gcc-%s-linux-gnu"] {os-family = "debian"}
+  ["gcc-%s-linux-gnu"] {os-family = "fedora"}
+  ["%s-linux-gnu-gcc"] {os-family = "arch"}
+  ["no-known-package"]
+    {os-distribution = "alpine" | os-family = "suse" | os-family = "opensuse" |
+     os-family = "bsd" | os = "macos" | os = "cygwin" | os = "win32"}
 ]
 x-maintenance-intent: ["(latest)"]
-|})
+|}
+          cmd cmd cmd deb_arch pfx_arch pfx_arch)
 
 let backend_package arch backend =
   let short_name, long_name = backend in
