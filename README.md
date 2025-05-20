@@ -103,28 +103,21 @@ to develop it.
 1.  Install Unikraft sources:
 
     ```
-    $ opam install unikraft
-    # or, if you must, you can also create a package by pinning and editing it,
-    # setting its description from unikraft.0.18.0.opin, so, in one go:
-    $ OPAMEDITOR="cp unikraft.0.18.0.opin" opam pin add --edit -y unikraft - < /dev/null
+    $ opam install unikraft unikraft-musl
+    # or pin the development branches:
+    $ opam pin add unikraft 'https://github.com/mirage/unikraft.git#mirage'
+    $ opam pin add unikraft-musl 'https://github.com/mirage/unikraft-lib-musl.git#mirage'
     ```
 
-2.  Download the other dependencies, mimicking what opam downloads when
-    installing the `ocaml-unikraft-<backend>-<arch>` packages:
+2.  Build the compiler locally, ie fully installed in `_build`:
 
     ```
-    $ make downloads
-    ```
-
-3.  Build the compiler locally, ie fully installed in `_build`:
-
-    ```
-    $ make localbuild UNIKRAFT="$(opam var unikraft:lib)"
+    $ make localbuild UNIKRAFT="$(opam var unikraft:lib)" UNIKRAFTMUSL="$(opam var unikraft-musl:lib)"
     ```
 
     where an extra `-jX` will be really useful.
 
-4.  Set the `PATH` and `OCAMLFIND_CONF` variables as indicated to access the
+3.  Set the `PATH` and `OCAMLFIND_CONF` variables as indicated to access the
     ocamlfind `unikraft` toolchain in your shell session, or simply run
     `make localtests` to run the tests in `examples/all/` with that compiler.
 
