@@ -346,24 +346,6 @@ _build/lib/unikraft: | _build/lib
 	fi
 	$(SYMLINK) "$(UNIKRAFT)" $@
 
-# Use curl to download the necessary sources and sha256sum to check their
-# consistency
-# This should be kept in sync with the opam package descriptions, obviously
-CURL_O := curl -fSL -o
-.PHONY: downloads
-downloads:
-	$(CURL_O) "musl-1.2.3.tar.gz" "https://www.musl-libc.org/releases/musl-1.2.3.tar.gz"
-	$(CURL_O) "lib-musl.tar.gz" "https://github.com/unikraft/lib-musl/archive/refs/tags/RELEASE-0.18.0.tar.gz"
-	mkdir -p patches/lib-musl/
-	$(CURL_O) "patches/lib-musl/arm64.patch" "https://raw.githubusercontent.com/shym/lib-musl/refs/heads/patches/arm64.patch"
-	$(CURL_O) "patches/lib-musl/main-tsd.patch" "https://raw.githubusercontent.com/shym/lib-musl/refs/heads/patches/main-tsd.patch"
-	printf '%s\n%s\n%s\n%s\n' \
-	    "7d5b0b6062521e4627e099e4c9dc8248d32a30285e959b7eecaa780cf8cfd4a4  musl-1.2.3.tar.gz" \
-	    "b51afee0227c0c8c419dd001fb6b6f57b529e5cadcd437afdd05e2e8667a1e2e  lib-musl.tar.gz" \
-	    "d83043f534a8da4f0133f4fbde0d78bc3a5d996ca6f7fc91b42ccf2874515514  patches/lib-musl/arm64.patch" \
-	    "9b87cbf0743492e6949de61af6423b463031da8b14b799a775c34886cabffd28  patches/lib-musl/main-tsd.patch" \
-	    | sha256sum -c -
-
 # Build and install a compiler in _build (assuming you set none of the
 # variables: prefix, BIN, LIB, SHARE)
 .PHONY: localbuild
