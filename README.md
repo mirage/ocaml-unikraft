@@ -41,6 +41,8 @@ This project is split up into the following packages.
 - `ocaml-unikraft`: the virtual package to ensure one of the default compiler
   package is installed.
 
+[Solo5]: https://github.com/Solo5/solo5
+
 The supported backends at the moment are:
 
 - [QEMU],
