@@ -61,8 +61,8 @@ to build on other OSes.
 
 This project is really meant to be installed by [opam], as it relies on opam to:
 
-- download the various necessary sources (the OCaml compiler, [musl], Unikraft’s
-  [lib-musl] and a few patches),
+- download the various necessary sources (sources of the OCaml compiler,
+  Unikraft, [musl], and Unikraft’s lib-musl),
 - install most of the files (the installation of the OCaml compiler itself is
   done by its upstream installation procedure).
 
@@ -72,7 +72,6 @@ So the easiest way to go about installing this project is to use the standard
 - or [`pin`] to install specific revisions of that repository.
 
 [musl]: https://musl.libc.org/
-[lib-musl]: https://github.com/unikraft/lib-musl
 [`install`]: https://opam.ocaml.org/doc/Usage.html#opam-install
 [`pin`]: https://opam.ocaml.org/doc/Usage.html#opam-pin
 
@@ -100,7 +99,7 @@ OCaml code of those examples are all quite simple, though.
 It is possible to build this project fully locally, which is really what is used
 to develop it.
 
-1.  Install Unikraft sources:
+1.  Install Unikraft and musl sources:
 
     ```
     $ opam install unikraft unikraft-musl
