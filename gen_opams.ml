@@ -243,13 +243,15 @@ depexts: [
   ["gcc-%s-linux-gnu"] {os-family = "debian"}
   ["gcc-%s-linux-gnu"] {os-family = "fedora"}
   ["%s-linux-gnu-gcc"] {os-family = "arch"}
-  ["no-known-package"]
-    {os-distribution = "alpine" | os-family = "suse" | os-family = "opensuse" |
-     os-family = "bsd" | os = "macos" | os = "cygwin" | os = "win32"}
 ]
+post-messages:
+  """\
+Please install %s-linux-gnu-gcc manually, as there is no known package
+for it for your distribution."""
+    {failure}
 x-maintenance-intent: ["(latest)"]
 |}
-          cmd cmd cmd deb_arch pfx_arch pfx_arch)
+          cmd cmd cmd deb_arch pfx_arch pfx_arch pfx_arch)
 
 let backend_package arch backend =
   let short_name, long_name = backend in
