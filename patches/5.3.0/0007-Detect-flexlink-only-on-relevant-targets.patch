@@ -1,7 +1,7 @@
 From eda4278b853186db65dc80acb9e3633ce14c8f9c Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Thu, 3 Oct 2024 11:47:16 +0200
-Subject: [PATCH 07/21] Detect `flexlink` only on relevant targets
+Subject: [PATCH 07/20] Detect `flexlink` only on relevant targets
 
 On Unix platforms, make sure it is possible to have a `flexlink`
 executable in `PATH` (which is useful for instance when using a cross
@@ -39,5 +39,5 @@ index 9b0331cdee..ea5fa86609 100644
    AS_IF([test -n "$flexlink" && test -z "$flexdll_source_dir"],[
      OCAML_TEST_FLEXLINK([$flexlink], [$flexdll_chain],
 -- 
-2.47.2
+2.50.0
 

@@ -1,7 +1,7 @@
-From cb9031aa59d7b971b1dd5ef57f5b2d65f47d9b30 Mon Sep 17 00:00:00 2001
+From caefee1e892042b502e324719640bc7a603b5ca4 Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Mon, 13 Jan 2025 12:19:19 +0100
-Subject: [PATCH 15/21] Add a `Config` variable for the need of the GNU
+Subject: [PATCH 14/20] Add a `Config` variable for the need of the GNU
  non-executable stack note
 
 Add a `Config.with_nonexecstack_note` variable to indicate whether the
@@ -15,7 +15,7 @@ as non-executable
  4 files changed, 9 insertions(+)
 
 diff --git a/utils/config.common.ml.in b/utils/config.common.ml.in
-index bd74c06504..50d6f8d16f 100644
+index 3603fe6c60..03a03c9225 100644
 --- a/utils/config.common.ml.in
 +++ b/utils/config.common.ml.in
 @@ -100,6 +100,7 @@ let configuration_variables () =
@@ -27,7 +27,7 @@ index bd74c06504..50d6f8d16f 100644
    p "ext_obj" ext_obj;
    p "ext_asm" ext_asm;
 diff --git a/utils/config.fixed.ml b/utils/config.fixed.ml
-index fd11c8fb04..12f1e7413a 100644
+index 807b929355..ab9b533d46 100644
 --- a/utils/config.fixed.ml
 +++ b/utils/config.fixed.ml
 @@ -36,6 +36,7 @@ let bytecomp_c_compiler = ""
@@ -39,7 +39,7 @@ index fd11c8fb04..12f1e7413a 100644
  let default_rpath = ""
  let mksharedlibrpath = ""
 diff --git a/utils/config.generated.ml.in b/utils/config.generated.ml.in
-index 0401e57c93..3a1b803613 100644
+index aa03455409..009e402f93 100644
 --- a/utils/config.generated.ml.in
 +++ b/utils/config.generated.ml.in
 @@ -45,6 +45,7 @@ let native_c_compiler =
@@ -51,7 +51,7 @@ index 0401e57c93..3a1b803613 100644
  let default_rpath = {@QS@|@rpath@|@QS@}
  let mksharedlibrpath = {@QS@|@mksharedlibrpath@|@QS@}
 diff --git a/utils/config.mli b/utils/config.mli
-index df133343c3..11b2a44edb 100644
+index 51e31a3729..c08bee00bf 100644
 --- a/utils/config.mli
 +++ b/utils/config.mli
 @@ -68,6 +68,12 @@ val native_c_libraries: string
@@ -68,5 +68,5 @@ index df133343c3..11b2a44edb 100644
  (** The linker to use for packaging (ocamlopt -pack) and for partial
      links (ocamlopt -output-obj). *)
 -- 
-2.47.2
+2.50.0
 

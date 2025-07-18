@@ -1,7 +1,7 @@
-From 8a9babc8d4db19b0015a6c4f10b4baee72026bec Mon Sep 17 00:00:00 2001
+From d3827762c1226cb09b0b9947b8e148dd2e5f3cf4 Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Fri, 31 Jan 2025 18:25:06 +0100
-Subject: [PATCH 17/21] Detect support for `.size` and `.type` assembler
+Subject: [PATCH 16/20] Detect support for `.size` and `.type` assembler
  directives
 
 Detect during `configure` whether the C compiler generates `.size` and
@@ -14,7 +14,7 @@ Define a macro in `m.h` and a configure variable so that OCaml can do as
 cc does
 ---
  aclocal.m4          |  48 ++++++++++++++++++++++++++++++++++++++++++++
- configure           | Bin 706809 -> 709763 bytes
+ configure           | Bin 706768 -> 709722 bytes
  configure.ac        |   2 ++
  runtime/caml/m.h.in |   5 +++++
  4 files changed, 55 insertions(+)
@@ -79,34 +79,34 @@ index 9c6feb1034..daf2f0ce5e 100644
    AC_CACHE_CHECK([whether $CC supports the labels as values extension],
      [ocaml_cv_prog_cc_labels_as_values],
 diff --git a/configure b/configure
-index 04aa389dc05d9592b6013fe73b16571384304e5b..21002bd5de4eacc978f2e09e3bbdc808c77ebebe 100755
+index 1735c1178d1f8c7c322f108c4f0207e6ff2576a1..d7921b85866b3adb0de8a9469b5a3d0966c1516b 100755
 GIT binary patch
 delta 1614
-zcmb7E&ubGw6eex+^Pt398nu*XTkY?lA=K88LeWrLP-0RPMc8aNv&raYHtcR%qbVu$
-z(1WKUI=y=I)?1Du_y-7Hm9{DsdJ+#pLDaXKCNZ(mHstMLX5Kg7`@T1CZ*6$x<?zPW
-zSi4Ri5y8l3iIAikkqo*(R(4~h-I#5Bke@BsZmhC`4Wk946{D@h3ih9rzuUCWw)@R&
-z5LpuZCIpCjhQF8H=Xi9>?(I5Y7b=(VZSFY5C!RaKK1>o0V4?HvC$?be%a;9{t*hCY
-zFjGBT47jH!J(L+B6VVWo#K1ZPb^d<nuSGe>q=5yMCI{iM2S6i6PGb-Z@K>9zGdw%d
-z(p5w@mK>O0lf=9Ste?rm+Bcz^9k9x2cAyt-6G*DSR09-MeE_nmfe2-_lEsP(*0PZ%
-zfJCq!)E1}#R5$bXx%5JcFrtYDNdjeHq(uXCn#n2zBvB_80%f`(GKs)^9uMG#n#ody
-zXjO=;x=6IFG!|6Is6tsH_i!}Da-%6pf{Q_a02b3!N(0GI0|_7)5tHaR_!UITRQ)9T
-zcvObI=~yHR{r9Yv@DDY3(*JaAuY*7PWIs7wm9k#yJkdQeJrtfPaSiZV6|h12rii9b
-z^$hC~i`BmS7ow$gU-k03YDQ}7^$_Ka0~*D2vUdQ>N7ls={FpHamn}h5Nz5pMv>;?P
-zH6=)rP$gLZg!M2cK`2y4V(N(XKQc-j`@V`Ybma6f+M_Z_$>}&%5XVDwQQ|j$v_$#%
-zXV)h0NVHz!v+GXpvHCLj2ie`p6UQAczP#={QFEc8$R3zHKNf-|4{B33;n4d0sdA;R
-zdJ>gMMRa@E&~k*oe$(3Rn~Gl-;xl(6!rYx`M7TN=i(HwTxfO}?3*Q~5dzkt^EdI9O
-z^6`ydPCrjfwYmMWn#1WyO`UX#j|+#GM)aJ5kIftl4I|VXuD-G`*>0CtIa+q@vFfIB
-ofzXoGQ_ac_%c6oqWZyOqf6?jaSY6(+V>mFJ7_QRtjywPHH=VFU7ytkO
+zcmbW1&rcIU6vtC^3*C!p1Oesn0w|OpO(YFOn;MNaSPupZ(P#|YWp~;RZf7>TTM&ix
+zU<?OOjfwLwn3x!D^-8=Oxq4AVIpD>+#`tziTiUb&Hhp`TnfICZzVFTZSRDQIdUWGw
+z^0ZB#5XD(BiK0`BXbxQ>&-Rj~y`*nAB!a8H+w1eIKD0Kp6KE$(^Q+PyD&BvVZuNy-
+zZ%~;IVHW|aor4NSZ2k84iK}0v;33C^zgL7_wFi69TWJ!GEw*0xBBi&Pz@Sh3+Lk_?
+zYjrTjxG2&<;u>WRq>1V%I&m;3g)b~d<;KNyo@v8Noa!NXDg#)=$y*E}6H$3h7TfQn
+zZjrjw)>puwJb92&lL&7@7x(AJ;_bV*RtLPSS{)dGdjxb2j5}a({s_|C0u{>I>V-;G
+zyk#d#00Y6C@M542P}}v}k7WQdgb_=1hz^v2lT{tCY0fkVXsS&-0%f+NGL68(3Ld}>
+zo-?UItSZ9f%fvFZ$%sM54a!pa$Kx56AJ1qST#SS#U^z>*ERY;^FaU%RRmTp1uz{pn
+z^~pYureSb88J~fnhhB?>M;hufB#HrFmw3J-bxv2ctk-&l*m9a43FvBkfOxY?Y!JUC
+z(ydf|j19;_wfX*q^yD6_-d>l_SZ%!?QQm0MD{e6dhEV_vyD)|y*FtdFlZ0z(&QP=^
+z#k6=v(KMwRVEwDMW9S6YXqm+LnD;+6Wfoh%N*Ot}dkhQ2nP%i|95l$0iLGj4dohqK
+zb$*l1`_43v{^gw?JtFm83fAOr$gUr*T$qf)nv9~9)jzT@2j#6K)I1Dg3(f*VowJDt
+zab@oQOkBB<NXD<vCGN&&g_`U*+t2u+gw37y9`R<kV`?hR^Ef)GtB6hUCE?Vvh@Cg^
+zWw|q;ak^F}D~i!8Ha6Q%8UG0&wyV}ebj@p^R;k9)s)0jezechscKf^5&0Pu2kJgUX
+LQ8IS}sjq(lgNZ_^
 
 delta 67
-zcmZo(sr_@J_J$8Z&78s8IfEIEG^g9tF#5K4)i44v6A&{4G0XO@8rHv=?cYAK0x=s9
-PvjZ{5_HQ3KdmjM+-N_(0
+zcmcb$Li@r*?F}D-nmL2Fa|SaiX-?OvVf1aUs$m3TCLm@8VwUYyHLQO#+n;@81!6WJ
+PW(Q)9?aw}PmOKIg)T$qh
 
 diff --git a/configure.ac b/configure.ac
-index 0f27490092..4709a67479 100644
+index 6cf1dbe353..e1f2e85610 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -232,6 +232,7 @@ AC_SUBST([ASPP])
+@@ -231,6 +231,7 @@ AC_SUBST([ASPP])
  AC_SUBST([endianness])
  AC_SUBST([AS])
  AC_SUBST([asm_cfi_supported])
@@ -114,7 +114,7 @@ index 0f27490092..4709a67479 100644
  AC_SUBST([sharedlib_cflags])
  AC_SUBST([rpath])
  AC_SUBST([mkdll])
-@@ -675,6 +676,7 @@ popdef([host_alias])dnl
+@@ -674,6 +675,7 @@ popdef([host_alias])dnl
  popdef([host])dnl
  
  OCAML_WITH_NONEXECSTACK_NOTE
@@ -139,5 +139,5 @@ index 2fcc9e6e2b..d771d26083 100644
  
  #define NO_NAKED_POINTERS 1
 -- 
-2.47.2
+2.50.0
 

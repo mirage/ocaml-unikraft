@@ -1,7 +1,7 @@
 From 65a1ec131040e11b29564247b2b4535b8b4f0098 Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Tue, 9 Jul 2024 19:17:14 +0200
-Subject: [PATCH 02/21] Use `target` instead of `host` when relevant in
+Subject: [PATCH 02/20] Use `target` instead of `host` when relevant in
  configuration
 
 As the C toolchain being configured is generating code for `target`, use
@@ -615,5 +615,5 @@ index 18b0681d26..75429a8b34 100644
      [AC_DEFINE([HAS_BROKEN_PRINTF], [1])
      AC_DEFINE([HAS_IPV6], [1])
 -- 
-2.47.2
+2.50.0
 
