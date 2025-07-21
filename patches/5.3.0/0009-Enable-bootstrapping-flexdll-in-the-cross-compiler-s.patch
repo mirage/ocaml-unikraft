@@ -1,7 +1,7 @@
-From a33717f0c294d288865f26d32240caf733cb79ab Mon Sep 17 00:00:00 2001
+From 2db4395bf193b40cde46d87bd7e7fc58d3554763 Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Tue, 3 Sep 2024 15:18:23 +0200
-Subject: [PATCH 10/21] Enable bootstrapping flexdll in the cross-compiler
+Subject: [PATCH 09/20] Enable bootstrapping flexdll in the cross-compiler
  setting
 
 Add a rule to build flexdll in the cross-compiler setting, namely
@@ -95,5 +95,5 @@ index c30d2e2b4f..e01792de20 100644
  INSTALL_OVERRIDES=build_ocamldoc=false WITH_DEBUGGER= OCAMLRUN=ocamlrun
  
 -- 
-2.47.2
+2.50.0
 

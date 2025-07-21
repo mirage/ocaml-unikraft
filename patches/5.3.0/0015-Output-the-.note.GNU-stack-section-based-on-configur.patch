@@ -1,7 +1,7 @@
-From 5dea8c6aed370f72e9ec1ceb12f5f86c683124eb Mon Sep 17 00:00:00 2001
+From c16fb4888f0da0e28df22df28e238d4b3048db3c Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Mon, 13 Jan 2025 12:25:58 +0100
-Subject: [PATCH 16/21] Output the `.note.GNU-stack` section based on
+Subject: [PATCH 15/20] Output the `.note.GNU-stack` section based on
  `configure`
 
 Uniformly rely on the detection during `configure` of whether the
@@ -298,5 +298,5 @@ index 99eeca2704..14c014c76e 100644
 -        .section .note.GNU-stack,"",%progbits
 +        NONEXECSTACK_NOTE
 -- 
-2.47.2
+2.50.0
 

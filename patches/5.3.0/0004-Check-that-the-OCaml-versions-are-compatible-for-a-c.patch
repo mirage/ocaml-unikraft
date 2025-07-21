@@ -1,7 +1,7 @@
 From 81844c1526bf09fc7faa63cb0128364e0de5c54f Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Tue, 16 Jul 2024 19:44:28 +0200
-Subject: [PATCH 04/21] Check that the OCaml versions are compatible for a
+Subject: [PATCH 04/20] Check that the OCaml versions are compatible for a
  cross compiler
 
 When building a cross compiler using an already built non-cross
@@ -50,5 +50,5 @@ index f3a219ef9a..7e3b3a054e 100644
  # Initialization of libtool
  # Allow the MSVC linker to be found even if ld isn't installed.
 -- 
-2.47.2
+2.50.0
 

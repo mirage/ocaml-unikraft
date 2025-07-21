@@ -1,7 +1,7 @@
-From 3f635f9a8a23d0fbfcc27b8dfbff3789ef5b80a0 Mon Sep 17 00:00:00 2001
+From a7c806941bb8fb5676e11a34f1e2a1e1b481d8c2 Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Fri, 23 Feb 2024 16:56:07 +0100
-Subject: [PATCH 09/21] Add a Makefile.cross with rules to build a cross
+Subject: [PATCH 08/20] Add a Makefile.cross with rules to build a cross
  compiler
 
 Add a new `Makefile.cross` that gets enabled when building a cross
@@ -113,5 +113,5 @@ index 0000000000..c30d2e2b4f
 +	# Real installation
 +	$(MAKE) install $(INSTALL_OVERRIDES)
 -- 
-2.47.2
+2.50.0
 

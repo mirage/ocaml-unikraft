@@ -1,7 +1,7 @@
-From c87901a8b99e5fa91fd67c8d7a9560c6aec0520f Mon Sep 17 00:00:00 2001
+From 6445eb911ce4ab68cdb6c3186b4652a3538f4cbb Mon Sep 17 00:00:00 2001
 From: David Allsopp <david.allsopp@metastack.com>
 Date: Sun, 15 Dec 2024 17:34:16 +0000
-Subject: [PATCH 11/21] Fix static builds of the compiler
+Subject: [PATCH 10/20] Fix static builds of the compiler
 
 ocamlc -custom needs to include <caml/mlvalues.h> and therefore the
 build has -I runtime in order to facilitate this. -I runtime breaks
@@ -45,5 +45,5 @@ index e01792de20..0d2cf8f323 100644
    BOOT_OCAMLLEX=ocamllex OCAMLYACC=ocamlyacc
  CROSS_COMPILER_OVERRIDES=$(CROSS_OVERRIDES) CAMLC=ocamlc CAMLOPT=ocamlopt \
 -- 
-2.47.2
+2.50.0
 

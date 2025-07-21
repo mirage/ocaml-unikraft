@@ -1,7 +1,7 @@
-From a29d3220e1fd926af4c2eae8a7c73545cf69c006 Mon Sep 17 00:00:00 2001
+From 0eac47067f78c99373d6df727fcf3c115d2da141 Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Fri, 31 Jan 2025 19:13:28 +0100
-Subject: [PATCH 19/21] Output the `.size` and `.type` directives based on
+Subject: [PATCH 18/20] Output the `.size` and `.type` directives based on
  `configure` result
 
 Uniformly rely on the detection during `configure` of whether the
@@ -477,5 +477,5 @@ index 70a44575fb..740d2a5496 100644
  /* Stack space to be reserved by the caller of a C function */
  #define RESERVED_STACK          160
 -- 
-2.47.2
+2.50.0
 

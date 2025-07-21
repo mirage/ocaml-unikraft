@@ -1,7 +1,7 @@
 From f7ce7cf720c530ccf533868b2fc28ba2f75eb699 Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Mon, 9 Dec 2024 19:23:40 +0100
-Subject: [PATCH 05/21] Use a `TARGET_BINDIR` configure variable instead of
+Subject: [PATCH 05/20] Use a `TARGET_BINDIR` configure variable instead of
  `--with-target-bindir`
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -81,5 +81,5 @@ index 7e3b3a054e..bb661f9f6a 100644
      [target_launch_method="$launch_method"])
    prefix="$saved_prefix"
 -- 
-2.47.2
+2.50.0
 

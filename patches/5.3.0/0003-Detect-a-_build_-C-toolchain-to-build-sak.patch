@@ -1,7 +1,7 @@
 From bf08fdb19e31cc517539f2c44dab5509c91cf719 Mon Sep 17 00:00:00 2001
 From: Samuel Hym <samuel@tarides.com>
 Date: Wed, 21 Feb 2024 18:47:12 +0100
-Subject: [PATCH 03/21] Detect a _build_ C toolchain to build `sak`
+Subject: [PATCH 03/20] Detect a _build_ C toolchain to build `sak`
 
 Import `ax_prog_cc_for_build` from the Autoconf Macro Archive to detect
 the C toolchain for the build machine when (and only when) we are
@@ -317,5 +317,5 @@ index 75429a8b34..f3a219ef9a 100644
  
  ## Check for the C compiler: done by libtool
 -- 
-2.47.2
+2.50.0
 

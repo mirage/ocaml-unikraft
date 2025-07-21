@@ -12,16 +12,18 @@ EXE="${EXEEXT:-}"
 case "$1" in
   default)
     # When building the default `unikraft.conf`, the OCaml compiler this will
-    # point to is assumed to be already installed in PREFIX
+    # point to is assumed to be already installed in SYSROOT
     ARCH=""
-    PREFIX="$3/lib/ocaml-unikraft-$2"
-    OCAMLDIR="$PREFIX/bin"
+    PREFIX="$3"
+    SYSROOT="$3/lib/ocaml-unikraft-$2"
+    OCAMLDIR="$SYSROOT/bin"
     BYTE=".byte"
     OCAMLDEP=ocamldep
     ;;
   *)
     ARCH="_$1"
-    PREFIX="$2/lib/ocaml-unikraft-$1"
+    PREFIX="$2"
+    SYSROOT="$2/lib/ocaml-unikraft-$1"
     OCAMLDIR="ocaml"
     BYTE=""
     OCAMLDEP=tools/ocamldep
@@ -36,7 +38,7 @@ checkopt() {
   fi
 }
 
-# Check that the compiler is installed in $PREFIX, so that it makes sense to
+# Check that the compiler is installed in $SYSROOT, so that it makes sense to
 # detect whether the .opt versions are available
 
 for cmd in ocamlc ocamlopt "$OCAMLDEP"; do
@@ -49,12 +51,12 @@ for cmd in ocamlc ocamlopt "$OCAMLDEP"; do
 done
 
 cat << EOF
-path(unikraft$ARCH) = "$PREFIX/lib/ocaml:$PREFIX/lib"
-destdir(unikraft$ARCH) = "$PREFIX/lib"
-stdlib(unikraft$ARCH) = "$PREFIX/lib/ocaml"
-ocamlopt(unikraft$ARCH) = "$PREFIX/bin/ocamlopt$(checkopt ocamlopt)"
-ocamlc(unikraft$ARCH) = "$PREFIX/bin/ocamlc$(checkopt ocamlc)"
-ocamlmklib(unikraft$ARCH) = "$PREFIX/bin/ocamlmklib$EXE"
-ocamldep(unikraft$ARCH) = "$PREFIX/bin/ocamldep$(checkopt "$OCAMLDEP")"
-ocamlcp(unikraft$ARCH) = "$PREFIX/bin/ocamlcp$EXE"
+path(unikraft$ARCH) = "$SYSROOT/lib/ocaml:$SYSROOT/lib:$PREFIX/lib"
+destdir(unikraft$ARCH) = "$SYSROOT/lib"
+stdlib(unikraft$ARCH) = "$SYSROOT/lib/ocaml"
+ocamlopt(unikraft$ARCH) = "$SYSROOT/bin/ocamlopt$(checkopt ocamlopt)"
+ocamlc(unikraft$ARCH) = "$SYSROOT/bin/ocamlc$(checkopt ocamlc)"
+ocamlmklib(unikraft$ARCH) = "$SYSROOT/bin/ocamlmklib$EXE"
+ocamldep(unikraft$ARCH) = "$SYSROOT/bin/ocamldep$(checkopt "$OCAMLDEP")"
+ocamlcp(unikraft$ARCH) = "$SYSROOT/bin/ocamlcp$EXE"
 EOF
