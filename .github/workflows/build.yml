@@ -9,6 +9,7 @@ on:
 env:
   UKVER: "0.18.0"
   OCUKVER: "1.0.0"
+  FCVER: "1.10.1"
   # OPAMVERBOSE: 3
 
 permissions: {}
@@ -86,10 +87,30 @@ jobs:
       - name: Show configuration
         run: |
           opam exec -- ocamlfind -toolchain unikraft ocamlc -config
-      - name: Test examples
+      - name: Test examples with QEMU
         run: |
           cd examples/all/
           opam exec -- dune runtest
+      - name: Install Firecracker
+        run: |
+          wget -q -O- "https://github.com/firecracker-microvm/firecracker/releases/download/v$FCVER/firecracker-v$FCVER-x86_64.tgz" | tar xvz
+          mkdir -p "$HOME/.local/bin"
+          mv "release-v$FCVER-x86_64/firecracker-v$FCVER-x86_64" "$HOME/.local/bin/firecracker"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Test examples with Firecracker
+        run: |
+          cd examples/all/
+          export UNIKRAFTBACKEND=firecracker
+          sudo setfacl -m u:${USER}:rw /dev/kvm
+          opam exec -- dune build @test-args
+          sudo setfacl -m u:${USER}:rw /dev/kvm
+          opam exec -- dune build @test-fail
+          sudo setfacl -m u:${USER}:rw /dev/kvm
+          opam exec -- dune build @test-hello
+          sudo setfacl -m u:${USER}:rw /dev/kvm
+          opam exec -- dune build @test-sleeper
+          sudo setfacl -m u:${USER}:rw /dev/kvm
+          opam exec -- dune build @test-threader
 
   mirage:
     name: Build and test a MirageOS network unikernel
