@@ -112,7 +112,6 @@ jobs:
         with:
           ocaml-compiler: 5.3.0
           opam-repositories: |
-            overlays: https://github.com/Firobe/mirage-unikraft-overlays.git
             default: https://github.com/ocaml/opam-repository.git
           # We need to pin our packages with their real version numbers, to
           # satisfy the dependency bounds of the other packages
