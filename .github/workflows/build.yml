@@ -11,6 +11,8 @@ env:
   OCUKVER: "1.0.0"
   # OPAMVERBOSE: 3
 
+permissions: {}
+
 jobs:
   test:
     name: Run examples on both architectures
