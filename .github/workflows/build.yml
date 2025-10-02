@@ -29,13 +29,6 @@ jobs:
         run: |
           opam pin add -yn 'https://github.com/mirage/unikraft.git#mirage'
           opam pin add -yn 'https://github.com/mirage/unikraft-lib-musl.git#mirage'
-          opam exec -- ocaml gen_opams.ml -r
-          echo 'version: "1"' >> packages/conf-aarch64-linux-gnu-gcc/conf-aarch64-linux-gnu-gcc.1/opam
-          OPAMEDITOR="cp packages/conf-aarch64-linux-gnu-gcc/conf-aarch64-linux-gnu-gcc.1/opam" \
-            opam pin add --edit -yn conf-aarch64-linux-gnu-gcc - < /dev/null
-          echo 'version: "1"' >> packages/conf-x86_64-linux-gnu-gcc/conf-x86_64-linux-gnu-gcc.1/opam
-          OPAMEDITOR="cp packages/conf-x86_64-linux-gnu-gcc/conf-x86_64-linux-gnu-gcc.1/opam" \
-            opam pin add --edit -yn conf-x86_64-linux-gnu-gcc - < /dev/null
           opam pin add -yn ocaml-unikraft.$OCUKVER .
           opam pin add -yn ocaml-unikraft-arm64.$OCUKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker.$UKVER .
