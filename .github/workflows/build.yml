@@ -9,7 +9,7 @@ on:
 env:
   UKVER: "0.18.0"
   OCUKVER: "1.0.0"
-  FCVER: "1.10.1"
+  FCVER: "1.13.1"
   # OPAMVERBOSE: 3
 
 permissions: {}
