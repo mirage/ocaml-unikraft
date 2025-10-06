@@ -6,7 +6,7 @@
  (libraries unikraftstartup))
 
 (rule
- (alias runtest)
+ (alias test-hello)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -37,7 +37,7 @@
   (run ./generator.exe fcconfig hello)))
 
 (rule
- (alias runtest)
+ (alias test-hello)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -49,6 +49,11 @@
  (action
   (run firecracker --no-api --config-file %{config})))
 
+(alias
+ (name runtest)
+ (deps
+  (alias test-hello)))
+
 (executable
  (name sleeper)
  (flags
@@ -57,7 +62,7 @@
  (libraries unikraftstartup unix))
 
 (rule
- (alias runtest)
+ (alias test-sleeper)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -88,7 +93,7 @@
   (run ./generator.exe fcconfig sleeper)))
 
 (rule
- (alias runtest)
+ (alias test-sleeper)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -100,6 +105,11 @@
  (action
   (run firecracker --no-api --config-file %{config})))
 
+(alias
+ (name runtest)
+ (deps
+  (alias test-sleeper)))
+
 (executable
  (name threader)
  (flags
@@ -108,7 +118,7 @@
  (libraries unikraftstartup unix threads))
 
 (rule
- (alias runtest)
+ (alias test-threader)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -139,7 +149,7 @@
   (run ./generator.exe fcconfig threader)))
 
 (rule
- (alias runtest)
+ (alias test-threader)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -151,6 +161,11 @@
  (action
   (run firecracker --no-api --config-file %{config})))
 
+(alias
+ (name runtest)
+ (deps
+  (alias test-threader)))
+
 (executable
  (name args)
  (flags
@@ -159,7 +174,7 @@
  (libraries unikraftstartup))
 
 (rule
- (alias runtest)
+ (alias test-args)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -192,7 +207,7 @@
   (run ./generator.exe fcconfig args "arg1" "arg2" "arg3" "arg4")))
 
 (rule
- (alias runtest)
+ (alias test-args)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -204,6 +219,11 @@
  (action
   (run firecracker --no-api --config-file %{config})))
 
+(alias
+ (name runtest)
+ (deps
+  (alias test-args)))
+
 (executable
  (name fail)
  (flags
@@ -212,7 +232,7 @@
  (libraries unikraftstartup))
 
 (rule
- (alias runtest)
+ (alias test-fail)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -239,7 +259,7 @@
   (run ./generator.exe fcconfig fail)))
 
 (rule
- (alias runtest)
+ (alias test-fail)
  (enabled_if
   (and
    (= %{context_name} unikraft)
@@ -250,4 +270,9 @@
   (:config fail_fcvm_config.json))
  (action
   (run firecracker --no-api --config-file %{config})))
+
+(alias
+ (name runtest)
+ (deps
+  (alias test-fail)))
 

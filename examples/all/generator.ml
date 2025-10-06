@@ -33,7 +33,7 @@ let print_dune_one_test test extralibs extraargs exitcodes =
  (libraries unikraftstartup%a))
 
 (rule
- (alias runtest)
+ (alias test-%s)
  (enabled_if
   (and
    (= %%{context_name} unikraft)
@@ -60,7 +60,7 @@ let print_dune_one_test test extralibs extraargs exitcodes =
   (run ./generator.exe fcconfig %s%a)))
 
 (rule
- (alias runtest)
+ (alias test-%s)
  (enabled_if
   (and
    (= %%{context_name} unikraft)
@@ -72,8 +72,13 @@ let print_dune_one_test test extralibs extraargs exitcodes =
  (action
   (run firecracker --no-api --config-file %%{config})))
 
+(alias
+ (name runtest)
+ (deps
+  (alias test-%s)))
+
 |}
-    test (pr " %s") extralibs
+    test (pr " %s") extralibs test
     (match exitcodes with
     | None ->
         {|(or
@@ -82,7 +87,7 @@ let print_dune_one_test test extralibs extraargs exitcodes =
     ; 83: Unikraft successful exit with ISA debug
     )|}
     | Some exitcodes -> exitcodes)
-    test qemu_args extraargs test test (pr " %S") extraargs test test
+    test qemu_args extraargs test test (pr " %S") extraargs test test test test
 
 let gen_dune () =
   print_dune_one_test "hello" [] [] None;
