@@ -16,17 +16,35 @@ jobs:
   test:
     name: Run examples on both architectures
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ocukver: dev
+            ukver: dev
+          - ocukver: dev
+            ukver: 0.18.0
+          - ocukver: 1.0.0
+            ukver: dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Read the version number from gen_opams.ml
+        env:
+          OCUKVER: ${{ matrix.ocukver }}
+          UKVER: ${{ matrix.ukver }}
         run: |
-          printf 'OCUKVER=%s\n' \
-            "$(awk '/^let version_ocaml_/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
-              >> "$GITHUB_ENV"
-          printf 'UKVER=%s\n' \
-            "$(awk '/^let version_unikraft/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
-              >> "$GITHUB_ENV"
+          # OCaml/Unikraft version number
+          V="$(awk '/^let version_o/ {gsub(/"/,"");print $4;}' gen_opams.ml)"
+          [[ "$OCUKVER" = dev ]] && OCUKVER="$V"
+          printf 'OCUKVER=%s\n' "$OCUKVER" >> "$GITHUB_ENV"
+          # Unikraft version number
+          U="$(awk '/^let version_u/ {gsub(/"/,"");print $4;}' gen_opams.ml)"
+          [[ "$UKVER" = dev ]] && UKVER="$U"
+          printf 'UKVER=%s\n' "$UKVER" >> "$GITHUB_ENV"
+          # Log
+          printf 'Dev versions:\n- OCaml/Unikraft: %s\n- Unikraft: %s\n' \
+            "$V" "$U"
       - name: Install OCaml compiler
         uses: ocaml/setup-ocaml@v3
         with:
@@ -34,24 +52,28 @@ jobs:
           # We need to pin our packages with their real version numbers, to
           # satisfy the dependency bounds of the other packages
           opam-pin: false
-      - name: Pin packages
+      - name: Pin Unikraft packages
         run: |
           opam pin add -yn "https://github.com/mirage/unikraft.git#$UKVER+mirage"
           opam pin add -yn "https://github.com/mirage/unikraft-lib-musl.git#$UKVER+mirage"
-          opam pin add -yn ocaml-unikraft.$OCUKVER .
-          opam pin add -yn ocaml-unikraft-arm64.$OCUKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker-arm64.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker-x86_64.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-qemu.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-qemu-arm64.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.$UKVER .
-          opam pin add -yn ocaml-unikraft-default-arm64.$OCUKVER .
-          opam pin add -yn ocaml-unikraft-default-x86_64.$OCUKVER .
           opam pin add -yn ocaml-unikraft-option-debug.$UKVER .
           opam pin add -yn ocaml-unikraft-toolchain-arm64.$UKVER .
           opam pin add -yn ocaml-unikraft-toolchain-x86_64.$UKVER .
+        if: ${{ matrix.ukver == 'dev' }}
+      - name: Pin OCaml/Unikraft packages
+        run: |
+          opam pin add -yn ocaml-unikraft.$OCUKVER .
+          opam pin add -yn ocaml-unikraft-arm64.$OCUKVER .
+          opam pin add -yn ocaml-unikraft-default-arm64.$OCUKVER .
+          opam pin add -yn ocaml-unikraft-default-x86_64.$OCUKVER .
           opam pin add -yn ocaml-unikraft-x86_64.$OCUKVER .
+        if: ${{ matrix.ocukver == 'dev' }}
       - name: Install extra packages
         run: |
           sudo apt-get update -y
@@ -59,13 +81,13 @@ jobs:
           opam install dune
       - name: Install arch-specific packages
         run: |
-          opam install                                \
-            ocaml-unikraft-x86_64                     \
-            ocaml-unikraft-backend-qemu-x86_64        \
-            ocaml-unikraft-backend-firecracker-x86_64 \
-            ocaml-unikraft-arm64                      \
-            ocaml-unikraft-backend-qemu-arm64         \
-            ocaml-unikraft-backend-firecracker-arm64
+          opam install                                       \
+            ocaml-unikraft-x86_64.$OCUKVER                   \
+            ocaml-unikraft-backend-qemu-x86_64.$UKVER        \
+            ocaml-unikraft-backend-firecracker-x86_64.$UKVER \
+            ocaml-unikraft-arm64.$OCUKVER                    \
+            ocaml-unikraft-backend-qemu-arm64.$UKVER         \
+            ocaml-unikraft-backend-firecracker-arm64.$UKVER
       - name: Show configuration
         run: |
           opam exec -- ocamlc -config
@@ -73,11 +95,11 @@ jobs:
           opam list
       - name: Install default packages
         run: |
-          opam install                    \
-            ocaml-unikraft                \
-            ocaml-unikraft-default-arm64  \
-            ocaml-unikraft-backend-qemu   \
-            ocaml-unikraft-backend-firecracker
+          opam install                            \
+            ocaml-unikraft.$OCUKVER               \
+            ocaml-unikraft-default-arm64.$OCUKVER \
+            ocaml-unikraft-backend-qemu.$UKVER    \
+            ocaml-unikraft-backend-firecracker.$UKVER
       - name: Show toolchain configuration
         run: |
           opam exec -- ocamlfind -toolchain unikraft ocamlc -config
@@ -89,7 +111,7 @@ jobs:
           opam exec -- dune runtest
       - name: Install the other default packages
         run: |
-          opam install ocaml-unikraft-default-x86_64
+          opam install ocaml-unikraft-default-x86_64.$OCUKVER
       - name: Show configuration
         run: |
           opam exec -- ocamlfind -toolchain unikraft ocamlc -config
