@@ -7,8 +7,6 @@ on:
   pull_request:
 
 env:
-  UKVER: "0.18.0"
-  OCUKVER: "1.0.0"
   FCVER: "1.13.1"
   # OPAMVERBOSE: 3
 
@@ -21,6 +19,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Read the version number from gen_opams.ml
+        run: |
+          printf 'OCUKVER=%s\n' \
+            "$(awk '/^let version_ocaml_/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
+              >> "$GITHUB_ENV"
+          printf 'UKVER=%s\n' \
+            "$(awk '/^let version_unikraft/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
+              >> "$GITHUB_ENV"
       - name: Install OCaml compiler
         uses: ocaml/setup-ocaml@v3
         with:
@@ -118,6 +124,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Read the version number from gen_opams.ml
+        run: |
+          printf 'OCUKVER=%s\n' \
+            "$(awk '/^let version_ocaml_/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
+              >> "$GITHUB_ENV"
+          printf 'UKVER=%s\n' \
+            "$(awk '/^let version_unikraft/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
+              >> "$GITHUB_ENV"
       - name: Checkout skeleton code
         uses: actions/checkout@v4
         with:
