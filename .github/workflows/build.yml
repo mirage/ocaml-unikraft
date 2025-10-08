@@ -178,6 +178,10 @@ jobs:
           cd skeleton/device-usage/network/
           opam exec -- mirage configure -t unikraft-qemu
           opam exec -- make
+      - name: Log `.opam.locked`
+        run: |
+          cd skeleton/device-usage/network/
+          cat mirage/network-unikraft-qemu.opam.locked
       - name: Install QEMU
         run: |
           sudo apt-get update
