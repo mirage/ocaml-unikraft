@@ -79,6 +79,19 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y qemu-system-x86 qemu-system-arm
           opam install dune
+      - name: Work around a bug in released OCaml/Unikraft
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          git="$HOME/.local/bin/git"
+          printf '#!/bin/sh\ngit=%s\n' "$(which git)" > "$git"
+          printf 'case "$1" in\n' >> "$git"
+          printf '  apply) exec "$git" --work-tree=. "$@" ;;\n' >> "$git"
+          printf '  *) exec "$git" "$@" ;;\nesac' >> "$git"
+          chmod +x "$git"
+          set -x
+          cat "$git"
+        if: ${{ matrix.ocukver == '1.0.0' }}
       - name: Install arch-specific packages
         run: |
           opam install                                       \
