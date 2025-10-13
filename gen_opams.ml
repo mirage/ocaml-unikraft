@@ -326,7 +326,8 @@ description:
 authors: "Samuel Hym"
 license: "MIT"
 depends: [
-  "ocaml-unikraft-backend-qemu-%s" | "ocaml-unikraft-backend-firecracker-%s"
+  "ocaml-unikraft-backend-qemu-%s" {= version} |
+  "ocaml-unikraft-backend-firecracker-%s" {= version}
 ]
 build: [
   [
