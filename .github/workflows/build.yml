@@ -154,7 +154,7 @@ jobs:
           opam exec -- dune build @test-threader
 
   mirage:
-    name: Build and test a MirageOS network unikernel
+    name: Build and test MirageOS unikernels
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -207,7 +207,7 @@ jobs:
       - name: Show toolchain configuration
         run: |
           opam exec -- ocamlfind -toolchain unikraft ocamlc -config
-      - name: Build skeleton
+      - name: Build network skeleton
         run: |
           set -x
           cd skeleton/device-usage/network/
@@ -221,7 +221,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-system-x86
-      - name: Test skeleton
+      - name: Test network skeleton
         run: |
           set -x
           sudo ip link add br0 type bridge
@@ -250,3 +250,43 @@ jobs:
             -kernel dist/network.qemu -append "-l debug --ipv4-only=true"
           set +x
           eval "$(cat res)"
+      - name: Patch block skeleton for Unikraft
+        run: |
+          cat > skeleton/fix.patch << EOF
+          diff --git a/device-usage/block/config.ml b/device-usage/block/config.ml
+          index 2c3ca47..27c751a 100644
+          --- a/device-usage/block/config.ml
+          +++ b/device-usage/block/config.ml
+          @@ -4,6 +4,7 @@ open Mirage
+           let main = main "Unikernel.Main" (block @-> job)
+           
+           let img =
+          -  if_impl Key.is_solo5 (block_of_file "storage") (block_of_file "disk.img")
+          +  if_impl Key.is_solo5 (block_of_file "storage")
+          +    (if_impl Key.is_unikraft (block_of_file "0") (block_of_file "disk.img"))
+           
+           let () = register "block_test" [ main $ img ]
+          EOF
+          set -x
+          cd skeleton
+          git apply -v fix.patch
+      - name: Build block skeleton
+        run: |
+          set -x
+          cd skeleton/device-usage/block/
+          opam exec -- mirage configure -t unikraft-qemu
+          opam exec -- make
+      - name: Log `.opam.locked`
+        run: |
+          cd skeleton/device-usage/block/
+          cat mirage/block_test-unikraft-qemu.opam.locked
+      - name: Test block skeleton
+        run: |
+          set -x
+          cd skeleton/device-usage/block/
+          head -c 100000 /dev/zero > disk.img
+          qemu-system-x86_64 -nographic -nodefaults -serial stdio -machine q35 \
+            -cpu "qemu64,-vmx,-svm,+x2apic,+pdpe1gb,+rdrand,+rdseed" -m 1G     \
+            -drive file=disk.img,if=virtio,id=hvirtio0,format=raw              \
+            -device isa-debug-exit -kernel dist/block_test.qemu                \
+          || [ $? = 83 ]
