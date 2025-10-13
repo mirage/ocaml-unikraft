@@ -165,6 +165,10 @@ jobs:
   mirage:
     name: Build and test MirageOS unikernels
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml: [5.3.0, 5.4.0]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -184,7 +188,7 @@ jobs:
       - name: Install OCaml compiler
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5.3.0
+          ocaml-compiler: ${{ matrix.ocaml }}
           opam-repositories: |
             default: https://github.com/ocaml/opam-repository.git
           # We need to pin our packages with their real version numbers, to
