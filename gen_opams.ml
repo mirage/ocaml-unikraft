@@ -148,9 +148,9 @@ install: [
 dev-repo: "git+https://github.com/unikraft/unikraft.git"
 url {
   src:
-    "https://github.com/mirage/unikraft/archive/refs/tags/v0.18.0.tar.gz"
+    "https://github.com/mirage/unikraft/archive/refs/tags/v0.20.0.tar.gz"
   checksum:
-    "sha256=bea0178b74d1c63fbb64c6c477e12bd01200cd7faa400dcd1114b5b679e274a5"
+    "sha256=f1e97df806acbd1a0a31ce4ca385e44ab65a1732c92199bd9ef50de4ceca7c76"
 }
 available:
   os = "linux" &
@@ -190,9 +190,9 @@ install: [
 dev-repo: "git+https://github.com/unikraft/lib-musl.git"
 url {
   src:
-    "https://github.com/mirage/unikraft-lib-musl/archive/refs/tags/v0.18.0.tar.gz"
+    "https://github.com/mirage/unikraft-lib-musl/archive/refs/tags/v0.20.0.tar.gz"
   checksum:
-    "sha256=1ef2a96b732a21a591be2bad49f6ccff623564119470e2098d66cc23a225ca29"
+    "sha256=2599591879bb771e8b5e33c33325a804cb20e854283614908ca872807450b820"
 }
 extra-source "musl-1.2.3.tar.gz" {
   src: "https://www.musl-libc.org/releases/musl-1.2.3.tar.gz"
