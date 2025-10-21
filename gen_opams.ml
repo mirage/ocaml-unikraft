@@ -13,15 +13,16 @@ let repository_layout = ref false
 let url = ref None
 
 let _ =
-  let url_src = ref "" in
   let url_and_checksum =
-    let seen = ref 0 in
+    let url_src = ref "" and seen = ref 0 in
     fun arg ->
       match !seen with
       | 0 ->
           url_src := arg;
           incr seen
-      | 1 -> url := Some (!url_src, arg)
+      | 1 ->
+          url := Some (!url_src, arg);
+          incr seen
       | _ -> failwith ("Don't know what to do with argument: " ^ arg)
   in
   Arg.parse
