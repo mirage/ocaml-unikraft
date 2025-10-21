@@ -263,26 +263,6 @@ jobs:
             -kernel dist/network.qemu -append "-l debug --ipv4-only=true"
           set +x
           eval "$(cat res)"
-      - name: Patch block skeleton for Unikraft
-        run: |
-          cat > skeleton/fix.patch << EOF
-          diff --git a/device-usage/block/config.ml b/device-usage/block/config.ml
-          index 2c3ca47..27c751a 100644
-          --- a/device-usage/block/config.ml
-          +++ b/device-usage/block/config.ml
-          @@ -4,6 +4,7 @@ open Mirage
-           let main = main "Unikernel.Main" (block @-> job)
-           
-           let img =
-          -  if_impl Key.is_solo5 (block_of_file "storage") (block_of_file "disk.img")
-          +  if_impl Key.is_solo5 (block_of_file "storage")
-          +    (if_impl Key.is_unikraft (block_of_file "0") (block_of_file "disk.img"))
-           
-           let () = register "block_test" [ main $ img ]
-          EOF
-          set -x
-          cd skeleton
-          git apply -v fix.patch
       - name: Build block skeleton
         run: |
           set -x
