@@ -17,7 +17,7 @@ depends: [
   "ocaml-unikraft-toolchain-arm64"
   "ocamlfind"
   "ocaml-src" {build}
-  "conf-git" {build}
+  "opatch" {build}
 ]
 build: [
   [

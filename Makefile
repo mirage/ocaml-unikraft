@@ -257,7 +257,7 @@ ocaml:
 	cp -r "$$(ocamlfind query ocaml-src)" $@
 	VERSION="$$(head -n1 ocaml/VERSION)" ; \
 	if test -d "patches/$$VERSION" ; then \
-	  git --work-tree=. apply -v --directory=$@ "patches/$$VERSION"/*; \
+	  opatch -v -C $@ "patches/$$VERSION"/*; \
 	fi
 
 # We add $(BLDBIN) inconditionnally, even when using the installed toolchain: as

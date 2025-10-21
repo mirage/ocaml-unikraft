@@ -359,7 +359,7 @@ depends: [
   "ocaml-unikraft-toolchain-%s"
   "ocamlfind"
   "ocaml-src" {build}
-  "conf-git" {build}
+  "opatch" {build}
 ]
 build: [
   [
