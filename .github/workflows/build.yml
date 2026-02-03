@@ -26,12 +26,6 @@ jobs:
           - ocukver: dev
             ukver: dev
             ocver: 5.3.0
-          - ocukver: dev
-            ukver: 0.18.0
-            ocver: 5.4.0
-          - ocukver: dev
-            ukver: 0.18.0
-            ocver: 5.3.0
           - ocukver: 1.0.0
             ukver: dev
             ocver: 5.3.0
