@@ -48,7 +48,7 @@ layout (see `-r`) nevertheless.
 
 let archs = [ "arm64"; "x86_64" ]
 let backends = [ ("firecracker", "Firecracker"); ("qemu", "QEMU") ]
-let options = [ ("debug", "debugging", []) ]
+let options = [ ("debug", "debugging", []); ("9pfs", "9pfs storage", []) ]
 
 (** How the architecture appears in the tool prefixes *)
 let prefix_arch = function
@@ -289,6 +289,7 @@ build: [
     "OCUKARCH=%s"
     "OCUKEXTLIBS=musl"
     "OCUKCONFIGOPTS+=debug" {ocaml-unikraft-option-debug:installed}
+    "OCUKCONFIGOPTS+=9pfs" {ocaml-unikraft-option-9pfs:installed}
     "UK_CFLAGS=-std=gnu11"
     "%%{name}%%.install"
   ]

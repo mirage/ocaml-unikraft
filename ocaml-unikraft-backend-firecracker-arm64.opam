@@ -17,6 +17,7 @@ depends: [
 ]
 depopts: [
   "ocaml-unikraft-option-debug"
+  "ocaml-unikraft-option-9pfs"
 ]
 build: [
   [
@@ -28,6 +29,7 @@ build: [
     "OCUKARCH=arm64"
     "OCUKEXTLIBS=musl"
     "OCUKCONFIGOPTS+=debug" {ocaml-unikraft-option-debug:installed}
+    "OCUKCONFIGOPTS+=9pfs" {ocaml-unikraft-option-9pfs:installed}
     "UK_CFLAGS=-std=gnu11"
     "%{name}%.install"
   ]

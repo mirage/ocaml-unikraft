@@ -18,6 +18,9 @@ This project is split up into the following packages.
 - `ocaml-unikraft-option-debug`: if that package is installed, the backends will
   be built with (really verbose!) debugging messages.
 
+- `ocaml-unikraft-option-9pfs`: if that package is installed, the backends will
+  support the 9P filesystem.
+
 - `ocaml-unikraft-toolchain-<arch>`: a toolchain using the
   `<arch>-unikraft-ocaml-` prefix; the toolchain is a set of wrapper shell
   scripts to add the necessary options to drive the underlying tools.

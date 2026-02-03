@@ -11,7 +11,7 @@ OCUKARCH ?= x86_64
 STDARCH := $(subst arm64,aarch64,$(OCUKARCH))
 # Unikraft external libraries (musl, lwip) to include
 OCUKEXTLIBS ?= musl
-# Options for the configuration (only available option at the moment: debug)
+# Options for the configuration (available options: debug, 9pfs)
 OCUKCONFIGOPTS ?=
 # Installation prefix for OCaml
 prefix ?= $$PWD/_build
@@ -148,7 +148,7 @@ fullconfigs:
 	+for p in qemu firecracker; do \
 	  for a in x86_64 arm64; do \
 	    for l in musl; do \
-	      for o in "" debug; do \
+	      for o in "" debug 9pfs "debug 9pfs"; do \
 	        $(MAKE) OCUKPLAT="$$p" OCUKARCH="$$a" OCUKEXTLIBS="$$l" \
 	          OCUKCONFIGOPTS="$$o" fullconfig ; \
 	      done \
