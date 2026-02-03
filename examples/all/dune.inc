@@ -276,3 +276,65 @@
  (deps
   (alias test-fail)))
 
+(executable
+ (name stack)
+ (flags
+  :standard
+  (:include "flags"))
+ (libraries unikraftstartup)
+ (foreign_stubs
+  (language c)
+  (flags
+   :standard
+   (:include "c_flags"))
+  (names stack_stubs)))
+
+(rule
+ (alias test-stack)
+ (enabled_if
+  (and
+   (= %{context_name} unikraft)
+   (= %{env:UNIKRAFTBACKEND=qemu} qemu)))
+ (action
+  (with-accepted-exit-codes
+   (or
+    0
+    83
+    ; 83: Unikraft successful exit with ISA debug
+    )
+   (run
+    %{read-lines:qemu-call}
+    -nographic
+    -nodefaults
+    -serial
+    stdio
+    -netdev
+    user,id=n0,restrict=on
+    -device
+    virtio-net-pci,netdev=n0
+    -kernel
+    %{dep:stack.exe}))))
+
+(rule
+ (with-stdout-to
+  stack_fcvm_config.json
+  (run ./generator.exe fcconfig stack)))
+
+(rule
+ (alias test-stack)
+ (enabled_if
+  (and
+   (= %{context_name} unikraft)
+   (= %{env:UNIKRAFTBACKEND=qemu} firecracker)
+   %{bin-available:firecracker}))
+ (deps
+  stack.exe
+  (:config stack_fcvm_config.json))
+ (action
+  (run firecracker --no-api --config-file %{config})))
+
+(alias
+ (name runtest)
+ (deps
+  (alias test-stack)))
+
