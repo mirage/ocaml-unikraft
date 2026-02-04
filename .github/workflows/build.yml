@@ -66,6 +66,7 @@ jobs:
           opam pin add -yn ocaml-unikraft-backend-qemu-arm64.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.$UKVER .
           opam pin add -yn ocaml-unikraft-option-debug.$UKVER .
+          opam pin add -yn ocaml-unikraft-option-9pfs.$UKVER .
           opam pin add -yn ocaml-unikraft-toolchain-arm64.$UKVER .
           opam pin add -yn ocaml-unikraft-toolchain-x86_64.$UKVER .
         if: ${{ matrix.ukver == 'dev' }}
@@ -196,6 +197,7 @@ jobs:
           opam pin add -yn ocaml-unikraft-backend-qemu.$UKVER .
           opam pin add -yn ocaml-unikraft-default-x86_64.$OCUKVER .
           opam pin add -yn ocaml-unikraft-option-debug.$UKVER .
+          opam pin add -yn ocaml-unikraft-option-9pfs.$UKVER .
           opam pin add -yn ocaml-unikraft-toolchain-x86_64.$UKVER .
           opam pin add -yn ocaml-unikraft-x86_64.$OCUKVER .
           opam pin add -yn ocaml-unikraft.$OCUKVER .
