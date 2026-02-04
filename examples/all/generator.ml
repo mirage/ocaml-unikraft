@@ -9,7 +9,7 @@
 
 let pr fmt out entries = List.iter (Printf.fprintf out fmt) entries
 
-let print_dune_one_test test extralibs extraargs exitcodes =
+let print_dune_one_test test extralibs extraargs exitcodes foreign_stubs =
   let concat fmt out entries =
     match entries with
     | [] -> ()
@@ -30,7 +30,7 @@ let print_dune_one_test test extralibs extraargs exitcodes =
  (flags
   :standard
   (:include "flags"))
- (libraries unikraftstartup%a))
+ (libraries unikraftstartup%a)%a)
 
 (rule
  (alias test-%s)
@@ -78,7 +78,21 @@ let print_dune_one_test test extralibs extraargs exitcodes =
   (alias test-%s)))
 
 |}
-    test (pr " %s") extralibs test
+    test (pr " %s") extralibs
+    (fun out stubs ->
+      match stubs with
+      | [] -> ()
+      | _ ->
+          Printf.fprintf out
+            {|
+ (foreign_stubs
+  (language c)
+  (flags
+   :standard
+   (:include "c_flags"))
+  (names%a))|}
+            (pr " %s") stubs)
+    foreign_stubs test
     (match exitcodes with
     | None ->
         {|(or
@@ -90,13 +104,14 @@ let print_dune_one_test test extralibs extraargs exitcodes =
     test qemu_args extraargs test test (pr " %S") extraargs test test test test
 
 let gen_dune () =
-  print_dune_one_test "hello" [] [] None;
-  print_dune_one_test "sleeper" [ "unix" ] [] None;
-  print_dune_one_test "threader" [ "unix"; "threads" ] [] None;
-  print_dune_one_test "args" [] [ "arg1"; "arg2"; "arg3"; "arg4" ] None;
+  print_dune_one_test "hello" [] [] None [];
+  print_dune_one_test "sleeper" [ "unix" ] [] None [];
+  print_dune_one_test "threader" [ "unix"; "threads" ] [] None [];
+  print_dune_one_test "args" [] [ "arg1"; "arg2"; "arg3"; "arg4" ] None [];
   (* Unfortunately, I see many crashing unikernels nevertheless reported as
      returning 83 *)
-  print_dune_one_test "fail" [] [] (Some "(or 0 83 85)")
+  print_dune_one_test "fail" [] [] (Some "(or 0 83 85)") [];
+  print_dune_one_test "stack" [] [] None ["stack_stubs"]
 
 let gen_firecracker_config () =
   let test = Sys.argv.(2) and args = Array.to_list Sys.argv |> List.drop 3 in
@@ -158,7 +173,8 @@ let usage () =
     {|%s dune.inc
 %s fcconfig <test> [args...]
 %s qemu-call <targetarch>
-|} me me me;
+|} me
+    me me;
   exit 1
 
 let _ =
