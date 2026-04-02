@@ -256,7 +256,8 @@ jobs:
             -cpu "qemu64,-vmx,-svm,+x2apic,+pdpe1gb,+rdrand,+rdseed" -m 1G     \
             -netdev tap,id=hnet0,ifname=tap0,vhost=off,script=no,downscript=no \
             -device virtio-net-pci,netdev=hnet0,id=net0                        \
-            -kernel dist/network.qemu -append "-l debug --ipv4-only=true"
+            -kernel dist/network.qemu                                          \
+            -append "-l debug --ipv4=10.0.0.2/24 --ipv4-only=true"
           set +x
           eval "$(cat res)"
       - name: Build block skeleton
