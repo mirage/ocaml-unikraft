@@ -125,7 +125,7 @@ jobs:
           cd examples/simple/
           opam exec -- dune build
           cd ../all/
-          opam exec -- dune runtest
+          opam exec -- dune runtest -f _build/unikraft
       - name: Install the other default packages
         run: |
           opam install ocaml-unikraft-default-x86_64.$OCUKVER
@@ -135,7 +135,7 @@ jobs:
       - name: Test examples with QEMU
         run: |
           cd examples/all/
-          opam exec -- dune runtest
+          opam exec -- dune runtest -f _build/unikraft
       - name: Install Firecracker
         run: |
           wget -q -O- "https://github.com/firecracker-microvm/firecracker/releases/download/v$FCVER/firecracker-v$FCVER-x86_64.tgz" | tar xvz
