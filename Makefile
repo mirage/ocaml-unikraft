@@ -111,23 +111,6 @@ $(MUSLARCHIVEPATH): $(MUSLARCHIVE)
 	mkdir -p $(dir $@)
 	cp $< $@
 
-# Enabled only on Linux (requirement of the olddefconfig target) and in
-# development (no need to rebuild the configuration in release)
-$(CONFIG): dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).config \
-    | $(BEBLDLIBDIR)/Makefile $(OCUKEXTLIBSDEPS)
-	if [ -e .git -a "`uname`" = Linux ]; then \
-	    cp $< $@; \
-	    $(UKMAKE) olddefconfig; \
-	    sed -e '/Unikraft.*Configuration/d' \
-	        -e '/CONFIG_UK_FULLVERSION/d' \
-	        -e '/CONFIG_HOST_ARCH/d' \
-	        -e '/CONFIG_UK_BASE/d' \
-	        -e '/CONFIG_UK_APP/d' \
-	        -i $@ ; \
-	else \
-	    touch $@; \
-	fi
-
 # Build the intermediate configuration file from configuration chunks
 CONFIG_CHUNKS := arch/$(OCUKARCH) plat/$(OCUKPLAT)
 CONFIG_CHUNKS += libs/base
@@ -135,12 +118,29 @@ CONFIG_CHUNKS += $(addprefix libs/,$(OCUKEXTLIBS))
 CONFIG_CHUNKS += opts/base
 CONFIG_CHUNKS += $(addprefix opts/,$(OCUKCONFIGOPTS))
 
+$(CONFIG): $(addprefix dummykernel/config/, $(CONFIG_CHUNKS))
+	$(info Warning: some config chunks are newer than the configuration)
+	$(info $(EMPTY)  configuration: $(CONFIG))
+	$(info $(EMPTY)  newer chunks:)
+	$(foreach ch,$?,$(info $(EMPTY)    - $(ch)))
+	$(info Hint: run '$(MAKE) fullconfig' to update the configuration)
+	@:
+
 dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).config: \
   $(addprefix dummykernel/config/, $(CONFIG_CHUNKS))
 	cat $^ > $@
 
 .PHONY: fullconfig
-fullconfig: $(CONFIG)
+fullconfig: dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).config \
+    | $(BEBLDLIBDIR)/Makefile $(OCUKEXTLIBSDEPS)
+	cp $< $(CONFIG)
+	$(UKMAKE) olddefconfig
+	sed -e '/Unikraft.*Configuration/d' \
+	    -e '/CONFIG_UK_FULLVERSION/d' \
+	    -e '/CONFIG_HOST_ARCH/d' \
+	    -e '/CONFIG_UK_BASE/d' \
+	    -e '/CONFIG_UK_APP/d' \
+	    -i $(CONFIG)
 
 # Rebuild all the full configurations
 .PHONY: fullconfigs
