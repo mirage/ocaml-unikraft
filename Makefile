@@ -56,6 +56,81 @@ OCAMLBUILT := _build/ocaml_built
 all: compiler
 
 
+# UNIKRAFT CONFIGURATION
+##########################
+
+# The suffix has the form `-liba+libb+libc-optx+opty`
+CONFIG_SUFFIX := \
+   $(subst $(SPACE),,\
+       $(patsubst %,-%,\
+           $(subst $(SPACE),+,$(OCUKEXTLIBS))\
+           $(subst $(SPACE),+,$(OCUKCONFIGOPTS))))
+
+SED_CLEAN_CONFIG := sed -e '/Unikraft.*Configuration/d' \
+                        -e '/CONFIG_UK_FULLVERSION/d' \
+                        -e '/CONFIG_HOST_ARCH/d' \
+                        -e '/CONFIG_UK_BASE/d' \
+                        -e '/CONFIG_UK_APP/d'
+
+ifeq ("$(OCUKCUSTOMCFGDIR)","")
+
+CONFIG := dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).fullconfig
+
+# Build the intermediate configuration file from configuration chunks
+CONFIG_CHUNKS := arch/$(OCUKARCH) plat/$(OCUKPLAT)
+CONFIG_CHUNKS += libs/base
+CONFIG_CHUNKS += $(addprefix libs/,$(OCUKEXTLIBS))
+CONFIG_CHUNKS += opts/base
+CONFIG_CHUNKS += $(addprefix opts/,$(OCUKCONFIGOPTS))
+
+$(CONFIG): $(addprefix dummykernel/config/, $(CONFIG_CHUNKS))
+	$(info Warning: some config chunks are newer than the configuration)
+	$(info $(EMPTY)  configuration: $(CONFIG))
+	$(info $(EMPTY)  newer chunks:)
+	$(foreach ch,$?,$(info $(EMPTY)    - $(ch)))
+	$(info Hint: run '$(MAKE) fullconfig' to update the configuration)
+	@:
+
+dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).config: \
+  $(addprefix dummykernel/config/, $(CONFIG_CHUNKS))
+	cat $^ > $@
+
+.PHONY: fullconfig
+fullconfig: dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).config \
+    | $(BEBLDLIBDIR)/Makefile $(OCUKEXTLIBSDEPS)
+	cp $< $(CONFIG)
+	$(UKMAKE) olddefconfig
+	$(SED_CLEAN_CONFIG) -i $(CONFIG)
+
+# Rebuild all the full configurations
+.PHONY: fullconfigs
+fullconfigs:
+	+for p in qemu firecracker; do \
+	  for a in x86_64 arm64; do \
+	    for l in musl; do \
+	      for o in "" debug 9pfs "debug 9pfs"; do \
+	        $(MAKE) OCUKPLAT="$$p" OCUKARCH="$$a" OCUKEXTLIBS="$$l" \
+	          OCUKCONFIGOPTS="$$o" fullconfig ; \
+	      done \
+	    done \
+	  done \
+	done
+
+else # $(OCUKCUSTOMCFGDIR) != ""
+
+CONFIG := custom-$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).fullconfig
+
+$(CONFIG): \
+  $(OCUKCUSTOMCFGDIR)/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).fullconfig
+	cp $< $@
+
+endif # $(OCUKCUSTOMCFGDIR)
+
+.PHONY: cleanconfig
+cleanconfig:
+	$(SED_CLEAN_CONFIG) -i $(CONFIG)
+
+
 # BUILD OF DUMMYKERNEL
 ########################
 
@@ -68,15 +143,6 @@ OCUKEXTLIBSARCHIVES :=
 ifneq ("$(findstring musl,$(OCUKEXTLIBS))","")
 OCUKEXTLIBSARCHIVES := $(OCUKEXTLIBSARCHIVES) $(MUSLARCHIVEPATH)
 endif
-
-# The suffix has the form `-liba+libb+libc-optx+opty`
-CONFIG_SUFFIX := \
-   $(subst $(SPACE),,\
-       $(patsubst %,-%,\
-           $(subst $(SPACE),+,$(OCUKEXTLIBS))\
-           $(subst $(SPACE),+,$(OCUKCONFIGOPTS))))
-
-CONFIG := dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).fullconfig
 
 UKMAKE := umask 0022 && \
    $(MAKE) -C $(BEBLDLIBDIR) \
@@ -110,51 +176,6 @@ $(MUSLARCHIVEPATH): $(MUSLARCHIVE)
 	fi
 	mkdir -p $(dir $@)
 	cp $< $@
-
-# Build the intermediate configuration file from configuration chunks
-CONFIG_CHUNKS := arch/$(OCUKARCH) plat/$(OCUKPLAT)
-CONFIG_CHUNKS += libs/base
-CONFIG_CHUNKS += $(addprefix libs/,$(OCUKEXTLIBS))
-CONFIG_CHUNKS += opts/base
-CONFIG_CHUNKS += $(addprefix opts/,$(OCUKCONFIGOPTS))
-
-$(CONFIG): $(addprefix dummykernel/config/, $(CONFIG_CHUNKS))
-	$(info Warning: some config chunks are newer than the configuration)
-	$(info $(EMPTY)  configuration: $(CONFIG))
-	$(info $(EMPTY)  newer chunks:)
-	$(foreach ch,$?,$(info $(EMPTY)    - $(ch)))
-	$(info Hint: run '$(MAKE) fullconfig' to update the configuration)
-	@:
-
-dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).config: \
-  $(addprefix dummykernel/config/, $(CONFIG_CHUNKS))
-	cat $^ > $@
-
-.PHONY: fullconfig
-fullconfig: dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).config \
-    | $(BEBLDLIBDIR)/Makefile $(OCUKEXTLIBSDEPS)
-	cp $< $(CONFIG)
-	$(UKMAKE) olddefconfig
-	sed -e '/Unikraft.*Configuration/d' \
-	    -e '/CONFIG_UK_FULLVERSION/d' \
-	    -e '/CONFIG_HOST_ARCH/d' \
-	    -e '/CONFIG_UK_BASE/d' \
-	    -e '/CONFIG_UK_APP/d' \
-	    -i $(CONFIG)
-
-# Rebuild all the full configurations
-.PHONY: fullconfigs
-fullconfigs:
-	+for p in qemu firecracker; do \
-	  for a in x86_64 arm64; do \
-	    for l in musl; do \
-	      for o in "" debug 9pfs "debug 9pfs"; do \
-	        $(MAKE) OCUKPLAT="$$p" OCUKARCH="$$a" OCUKEXTLIBS="$$l" \
-	          OCUKCONFIGOPTS="$$o" fullconfig ; \
-	      done \
-	    done \
-	  done \
-	done
 
 $(BEBLDLIBDIR)/Makefile: | $(BEBLDLIBDIR) $(LIB)/unikraft
 	test -e "$(UNIKRAFT)/Makefile"
