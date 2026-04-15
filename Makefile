@@ -56,18 +56,8 @@ OCAMLBUILT := _build/ocaml_built
 all: compiler
 
 
-# BUILD OF DUMMYKERNEL
-########################
-
-LIBMUSL := _build/libs/musl
-MUSLARCHIVE := $(wildcard $(UNIKRAFTMUSL)/musl-*.tar.gz)
-MUSLARCHIVEPATH := $(BEBLDLIBDIR)/libmusl/$(notdir $(MUSLARCHIVE))
-
-OCUKEXTLIBSDEPS := $(addprefix _build/libs/,$(OCUKEXTLIBS))
-OCUKEXTLIBSARCHIVES :=
-ifneq ("$(findstring musl,$(OCUKEXTLIBS))","")
-OCUKEXTLIBSARCHIVES := $(OCUKEXTLIBSARCHIVES) $(MUSLARCHIVEPATH)
-endif
+# UNIKRAFT CONFIGURATION
+##########################
 
 # The suffix has the form `-liba+libb+libc-optx+opty`
 CONFIG_SUFFIX := \
@@ -77,39 +67,6 @@ CONFIG_SUFFIX := \
            $(subst $(SPACE),+,$(OCUKCONFIGOPTS))))
 
 CONFIG := dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).fullconfig
-
-UKMAKE := umask 0022 && \
-   $(MAKE) -C $(BEBLDLIBDIR) \
-       CONFIG_UK_BASE="$(UNIKRAFT)/" \
-       O="$$PWD/$(BEBLDLIBDIR)/" \
-       A="$$PWD/dummykernel/" \
-       L="$(subst $(SPACE),:,$(addprefix $$PWD/,$(OCUKEXTLIBSDEPS)))" \
-       N=dummykernel \
-       C="$$PWD/$(CONFIG)"
-
-# Main build rule for the dummy kernel
-$(BACKENDBUILT): $(CONFIG) | $(BEBLDLIBDIR)/Makefile $(LIB)/unikraft \
-    $(OCUKEXTLIBSDEPS) $(OCUKEXTLIBSARCHIVES)
-	+$(UKMAKE) sub_make_exec=1
-	touch $@
-
-_build/libs/musl:
-	@if test -z "$(MUSLARCHIVE)" ; then \
-	    echo "Cannot find lib-musl sources;" \
-	        "set UNIKRAFTMUSL=... in your $(MAKE) call"; \
-	    false; \
-	fi
-	mkdir -p $(dir $@)
-	$(SYMLINK) "$(UNIKRAFTMUSL)" $@
-
-$(MUSLARCHIVEPATH): $(MUSLARCHIVE)
-	@if test -z "$<" ; then \
-	    echo "Cannot find lib-musl sources;" \
-	        "set UNIKRAFTMUSL=... in your $(MAKE) call"; \
-	    false; \
-	fi
-	mkdir -p $(dir $@)
-	cp $< $@
 
 # Build the intermediate configuration file from configuration chunks
 CONFIG_CHUNKS := arch/$(OCUKARCH) plat/$(OCUKPLAT)
@@ -155,6 +112,53 @@ fullconfigs:
 	    done \
 	  done \
 	done
+
+
+# BUILD OF DUMMYKERNEL
+########################
+
+LIBMUSL := _build/libs/musl
+MUSLARCHIVE := $(wildcard $(UNIKRAFTMUSL)/musl-*.tar.gz)
+MUSLARCHIVEPATH := $(BEBLDLIBDIR)/libmusl/$(notdir $(MUSLARCHIVE))
+
+OCUKEXTLIBSDEPS := $(addprefix _build/libs/,$(OCUKEXTLIBS))
+OCUKEXTLIBSARCHIVES :=
+ifneq ("$(findstring musl,$(OCUKEXTLIBS))","")
+OCUKEXTLIBSARCHIVES := $(OCUKEXTLIBSARCHIVES) $(MUSLARCHIVEPATH)
+endif
+
+UKMAKE := umask 0022 && \
+   $(MAKE) -C $(BEBLDLIBDIR) \
+       CONFIG_UK_BASE="$(UNIKRAFT)/" \
+       O="$$PWD/$(BEBLDLIBDIR)/" \
+       A="$$PWD/dummykernel/" \
+       L="$(subst $(SPACE),:,$(addprefix $$PWD/,$(OCUKEXTLIBSDEPS)))" \
+       N=dummykernel \
+       C="$$PWD/$(CONFIG)"
+
+# Main build rule for the dummy kernel
+$(BACKENDBUILT): $(CONFIG) | $(BEBLDLIBDIR)/Makefile $(LIB)/unikraft \
+    $(OCUKEXTLIBSDEPS) $(OCUKEXTLIBSARCHIVES)
+	+$(UKMAKE) sub_make_exec=1
+	touch $@
+
+_build/libs/musl:
+	@if test -z "$(MUSLARCHIVE)" ; then \
+	    echo "Cannot find lib-musl sources;" \
+	        "set UNIKRAFTMUSL=... in your $(MAKE) call"; \
+	    false; \
+	fi
+	mkdir -p $(dir $@)
+	$(SYMLINK) "$(UNIKRAFTMUSL)" $@
+
+$(MUSLARCHIVEPATH): $(MUSLARCHIVE)
+	@if test -z "$<" ; then \
+	    echo "Cannot find lib-musl sources;" \
+	        "set UNIKRAFTMUSL=... in your $(MAKE) call"; \
+	    false; \
+	fi
+	mkdir -p $(dir $@)
+	cp $< $@
 
 $(BEBLDLIBDIR)/Makefile: | $(BEBLDLIBDIR) $(LIB)/unikraft
 	test -e "$(UNIKRAFT)/Makefile"
