@@ -66,6 +66,14 @@ CONFIG_SUFFIX := \
            $(subst $(SPACE),+,$(OCUKEXTLIBS))\
            $(subst $(SPACE),+,$(OCUKCONFIGOPTS))))
 
+SED_CLEAN_CONFIG := sed -e '/Unikraft.*Configuration/d' \
+                        -e '/CONFIG_UK_FULLVERSION/d' \
+                        -e '/CONFIG_HOST_ARCH/d' \
+                        -e '/CONFIG_UK_BASE/d' \
+                        -e '/CONFIG_UK_APP/d'
+
+ifeq ("$(OCUKCUSTOMCFGDIR)","")
+
 CONFIG := dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).fullconfig
 
 # Build the intermediate configuration file from configuration chunks
@@ -92,12 +100,7 @@ fullconfig: dummykernel/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).config \
     | $(BEBLDLIBDIR)/Makefile $(OCUKEXTLIBSDEPS)
 	cp $< $(CONFIG)
 	$(UKMAKE) olddefconfig
-	sed -e '/Unikraft.*Configuration/d' \
-	    -e '/CONFIG_UK_FULLVERSION/d' \
-	    -e '/CONFIG_HOST_ARCH/d' \
-	    -e '/CONFIG_UK_BASE/d' \
-	    -e '/CONFIG_UK_APP/d' \
-	    -i $(CONFIG)
+	$(SED_CLEAN_CONFIG) -i $(CONFIG)
 
 # Rebuild all the full configurations
 .PHONY: fullconfigs
@@ -112,6 +115,20 @@ fullconfigs:
 	    done \
 	  done \
 	done
+
+else # $(OCUKCUSTOMCFGDIR) != ""
+
+CONFIG := custom-$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).fullconfig
+
+$(CONFIG): \
+  $(OCUKCUSTOMCFGDIR)/$(OCUKPLAT)-$(OCUKARCH)$(CONFIG_SUFFIX).fullconfig
+	cp $< $@
+
+endif # $(OCUKCUSTOMCFGDIR)
+
+.PHONY: cleanconfig
+cleanconfig:
+	$(SED_CLEAN_CONFIG) -i $(CONFIG)
 
 
 # BUILD OF DUMMYKERNEL
