@@ -278,6 +278,7 @@ depopts: [|}
         options;
       Printf.fprintf out
         {|
+  "ocaml-unikraft-custom-configs"
 ]
 build: [
   [
@@ -290,6 +291,8 @@ build: [
     "OCUKEXTLIBS=musl"
     "OCUKCONFIGOPTS+=debug" {ocaml-unikraft-option-debug:installed}
     "OCUKCONFIGOPTS+=9pfs" {ocaml-unikraft-option-9pfs:installed}
+    "OCUKCUSTOMCFGDIR=%%{ocaml-unikraft-custom-configs:share}%%"
+      {ocaml-unikraft-custom-configs:installed}
     "UK_CFLAGS=-std=gnu11"
     "%%{name}%%.install"
   ]
