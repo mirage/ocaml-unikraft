@@ -364,7 +364,7 @@ localtests:
 	  cd examples/all/ && \
 	  PATH="$$pwd/$(BLDBIN):$$PATH" \
 	  OCAMLFIND_CONF="$$pwd/_build/unikraft.conf" \
-	  dune runtest
+	  dune runtest _build/unikraft/
 
 .PHONY: opams
 opams:
