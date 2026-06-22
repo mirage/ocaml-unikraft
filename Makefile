@@ -271,7 +271,10 @@ ocaml/Makefile.config: $(TOOLCHAIN) | ocaml
 		--prefix="$$PREFIX/lib/$(OCAMLPKG)" \
 		--disable-shared \
 		--disable-ocamldoc \
-		--without-zstd
+		--without-zstd \
+		--with-relative-libdir \
+		--enable-runtime-search \
+		--enable-runtime-search-target
 
 $(OCAMLBUILT): ocaml/Makefile.config | _build
 	PATH="$$PWD/$(BLDBIN):$$PATH" \
