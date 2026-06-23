@@ -56,6 +56,9 @@ OCAMLBUILT := _build/ocaml_built
 all: compiler
 
 
+# Quote for sh
+SHQUOTE = '$(subst ','\'',$(1))'
+
 # BUILD OF DUMMYKERNEL
 ########################
 
@@ -263,12 +266,11 @@ ocaml:
 # We add $(BLDBIN) inconditionnally, even when using the installed toolchain: as
 # the $(BLDBIN) directory should not be built, it will just be ignored
 ocaml/Makefile.config: $(TOOLCHAIN) | ocaml
-	PREFIX="$(prefix)" ; \
 	cd ocaml && \
 	  PATH="$$PWD/../$(BLDBIN):$$PATH" \
 	  ./configure \
 		--target=$(STDARCH)-unikraft-ocaml \
-		--prefix="$$PREFIX/lib/$(OCAMLPKG)" \
+		--prefix=$(call SHQUOTE,$(prefix)/lib/$(OCAMLPKG)) \
 		--disable-shared \
 		--disable-ocamldoc \
 		--without-zstd \
@@ -279,7 +281,9 @@ ocaml/Makefile.config: $(TOOLCHAIN) | ocaml
 
 $(OCAMLBUILT): ocaml/Makefile.config | _build
 	PATH="$$PWD/$(BLDBIN):$$PATH" \
-	  $(MAKE) -C ocaml crossopt OLDS="-o yacc/ocamlyacc -o lex/ocamllex"
+	  $(MAKE) -C ocaml crossopt \
+	    prefix=$(call SHQUOTE,$(prefix)/lib/$(OCAMLPKG)) \
+	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex"
 	touch $@
 
 OCAMLFIND_CONF := _build/unikraft_$(OCUKARCH).conf
