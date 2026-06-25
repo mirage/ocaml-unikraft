@@ -26,6 +26,12 @@ jobs:
           - ocukver: dev
             ukver: dev
             ocver: 5.5.0
+          - ocukver: dev
+            ukver: 0.20.0
+            ocver: 5.5.0
+          - ocukver: 1.1.0
+            ukver: dev
+            ocver: 5.5.0
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
