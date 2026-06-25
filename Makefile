@@ -304,7 +304,10 @@ $(OCAMLBUILT): ocaml/Makefile.config | _build
 	PATH="$$PWD/$(BLDBIN):$$PATH" \
 	  $(MAKE) -C ocaml crossopt \
 	    prefix=$(call SHQUOTE,$(prefix)/lib/$(OCAMLPKG)) \
-	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex"
+	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex" \
+	    $$(case "$$(ocamlc -vnum)" in \
+	         5.5.*) echo LIBDIR=../lib/ocaml ;; \
+	       esac)
 	touch $@
 
 OCAMLFIND_CONF := _build/unikraft_$(OCUKARCH).conf
