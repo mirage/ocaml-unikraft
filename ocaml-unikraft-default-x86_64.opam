@@ -18,3 +18,4 @@ conflict-class: "ocaml-unikraft-default"
 build: [
   [make "prefix=%{prefix}%" "OCUKARCH=x86_64" "%{name}%.install"]
 ]
+conflicts: ["relocatable"]

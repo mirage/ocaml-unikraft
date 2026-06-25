@@ -379,7 +379,9 @@ build: [
 install: [
   [make "install-ocaml"]
 ]
-conflicts: ["ocaml-option-bytecode-only"]
+conflicts: ["ocaml-option-bytecode-only" "relocatable"]
+# The package is not completely relocatable yet as the ocamlfind toolchain
+# description contains absolute paths
 |}
         arch arch arch arch)
 
@@ -399,6 +401,7 @@ conflict-class: "ocaml-unikraft-default"
 build: [
   [make "prefix=%%{prefix}%%" "OCUKARCH=%s" "%%{name}%%.install"]
 ]
+conflicts: ["relocatable"]
 |}
         arch arch arch arch)
 
