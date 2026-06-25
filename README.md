@@ -97,6 +97,18 @@ both QEMU and Firecracker require some configuration to run a unikernel. The
 OCaml code of those examples are all quite simple, though.
 
 
+## Custom configurations
+
+Unikraft offers a lot of configuration options. The `ocaml-unikraft-option-*`
+packages give an easy way to enable some options but the exponential number of
+combinations make this obviously limited. To expose nevertheless the rich set of
+Unikraft options, you can create a package with custom configurations starting
+from this [template]. The template repository provides more detailed
+instructions on how to proceed.
+
+[template]: https://github.com/mirage/ocaml-unikraft-custom-configs
+
+
 ## Development
 
 It is possible to build this project fully locally, which is really what is used
