@@ -4,8 +4,13 @@
 
 (* OCaml script to generate all the *.opam files *)
 
-let version_ocaml_unikraft = "1.1.0"
-let version_unikraft = "0.20.0"
+let version_ocaml_unikraft = "1.2.0"
+
+(* Version for the Unikraft sources *)
+let version_unikraft_base = "0.20.0"
+
+(* Version for the OCaml/Unikraft backend, etc. packages *)
+let version_unikraft_full = "0.20.0-1"
 
 (**)
 
@@ -122,7 +127,7 @@ let unikraft_package () =
            [
              "packages";
              "unikraft";
-             Printf.sprintf "unikraft.%s" version_unikraft;
+             Printf.sprintf "unikraft.%s" version_unikraft_base;
            ])
         "opam"
     in
@@ -169,7 +174,7 @@ let unikraft_musl_package () =
            [
              "packages";
              "unikraft-musl";
-             Printf.sprintf "unikraft-musl.%s" version_unikraft;
+             Printf.sprintf "unikraft-musl.%s" version_unikraft_base;
            ])
         "opam"
     in
@@ -259,19 +264,20 @@ let backend_package arch backend =
   let package_name =
     Printf.sprintf "ocaml-unikraft-backend-%s-%s" short_name arch
   in
-  with_package false package_name version_unikraft (fun out ->
+  with_package false package_name version_unikraft_full (fun out ->
       Printf.fprintf out
         {|
 synopsis: "%s/%s Unikraft backend for OCaml"
 authors: ["Samuel Hym" "Unikraft contributors"]
 license: ["MIT" "BSD-3-Clause" "GPL-2.0-only"]
 depends: [
-  "unikraft" {= version}
-  "unikraft-musl" {= version}
+  "unikraft" {= "%s"}
+  "unikraft-musl" {= "%s"}
   "conf-%s-linux-gnu-gcc" {arch != "%s"}
 ]
 depopts: [|}
-        long_name arch (prefix_arch arch) arch;
+        long_name arch version_unikraft_base version_unikraft_base
+        (prefix_arch arch) arch;
       List.iter
         (fun (opt, _, _) ->
           Printf.fprintf out "\n  \"ocaml-unikraft-option-%s\"" opt)
@@ -303,7 +309,7 @@ build: [
 let option_package option =
   let short_name, long_name, conflicts = option in
   let package_name = Printf.sprintf "ocaml-unikraft-option-%s" short_name in
-  with_package true package_name version_unikraft (fun out ->
+  with_package true package_name version_unikraft_full (fun out ->
       Printf.fprintf out
         {|
 synopsis:
@@ -321,7 +327,7 @@ license: "MIT"
 
 let toolchain_package arch =
   let package_name = Printf.sprintf "ocaml-unikraft-toolchain-%s" arch in
-  with_package false package_name version_unikraft (fun out ->
+  with_package false package_name version_unikraft_full (fun out ->
       Printf.fprintf out
         {|
 synopsis:
@@ -408,7 +414,7 @@ conflicts: ["relocatable"]
 let default_backend_package backend =
   let short_name, long_name = backend in
   let package_name = Printf.sprintf "ocaml-unikraft-backend-%s" short_name in
-  with_package true package_name version_unikraft (fun out ->
+  with_package true package_name version_unikraft_full (fun out ->
       Printf.fprintf out
         {|
 synopsis:

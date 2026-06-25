@@ -39,7 +39,8 @@ jobs:
           [[ "$OCUKVER" = dev ]] && OCUKVER="$V"
           printf 'OCUKVER=%s\n' "$OCUKVER" >> "$GITHUB_ENV"
           # Unikraft version number
-          U="$(awk '/^let version_u/ {gsub(/"/,"");print $4;}' gen_opams.ml)"
+          U="$(awk '/^let version_unikraft_full/ {gsub(/"/,"");print $4;}' \
+            gen_opams.ml)"
           [[ "$UKVER" = dev ]] && UKVER="$U"
           printf 'UKVER=%s\n' "$UKVER" >> "$GITHUB_ENV"
           # Log
@@ -54,8 +55,8 @@ jobs:
           opam-pin: false
       - name: Pin Unikraft packages
         run: |
-          opam pin add -yn "https://github.com/mirage/unikraft.git#$UKVER+mirage"
-          opam pin add -yn "https://github.com/mirage/unikraft-lib-musl.git#$UKVER+mirage"
+          opam pin add -yn "https://github.com/mirage/unikraft.git#${UKVER%-*}+mirage"
+          opam pin add -yn "https://github.com/mirage/unikraft-lib-musl.git#${UKVER%-*}+mirage"
           opam pin add -yn ocaml-unikraft-backend-firecracker.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker-arm64.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker-x86_64.$UKVER .
@@ -170,7 +171,7 @@ jobs:
             "$(awk '/^let version_ocaml_/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
               >> "$GITHUB_ENV"
           printf 'UKVER=%s\n' \
-            "$(awk '/^let version_unikraft/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
+            "$(awk '/^let version_unikraft_full/ {gsub(/"/,"");print $4;}' gen_opams.ml)" \
               >> "$GITHUB_ENV"
       - name: Checkout skeleton code
         uses: actions/checkout@v6
@@ -188,8 +189,8 @@ jobs:
           opam-pin: false
       - name: Pin necessary packages
         run: |
-          opam pin add -yn "https://github.com/mirage/unikraft.git#$UKVER+mirage"
-          opam pin add -yn "https://github.com/mirage/unikraft-lib-musl.git#$UKVER+mirage"
+          opam pin add -yn "https://github.com/mirage/unikraft.git#${UKVER%-*}+mirage"
+          opam pin add -yn "https://github.com/mirage/unikraft-lib-musl.git#${UKVER%-*}+mirage"
           opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-qemu.$UKVER .
           opam pin add -yn ocaml-unikraft-default-x86_64.$OCUKVER .
