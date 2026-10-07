@@ -13,8 +13,15 @@ STDARCH := $(subst arm64,aarch64,$(OCUKARCH))
 OCUKEXTLIBS ?= musl
 # Options for the configuration (available options: debug, 9pfs)
 OCUKCONFIGOPTS ?=
-# Installation prefix for OCaml
-prefix ?= $$PWD/_build
+# Shell-quoted installation prefix for OCaml
+# Note that it is meant to be interpreted in the current directory ($PWD) in the
+# second case, which matters in the rules that build the OCaml compiler in the
+# `ocaml` subdirectory
+ifdef prefix
+OCUKPREFIX := '$(subst ','\'',$(prefix))'
+else
+OCUKPREFIX := "$$PWD/_build"
+endif
 
 EMPTY =
 SPACE = $(EMPTY) $(EMPTY)
@@ -55,9 +62,6 @@ OCAMLBUILT := _build/ocaml_built
 .PHONY: all
 all: compiler
 
-
-# Quote for sh
-SHQUOTE = '$(subst ','\'',$(1))'
 
 # UNIKRAFT CONFIGURATION
 ##########################
@@ -287,11 +291,12 @@ ocaml:
 # We add $(BLDBIN) inconditionnally, even when using the installed toolchain: as
 # the $(BLDBIN) directory should not be built, it will just be ignored
 ocaml/Makefile.config: $(TOOLCHAIN) | ocaml
+	OCUKPREFIX=$(OCUKPREFIX) ; \
 	cd ocaml && \
 	  PATH="$$PWD/../$(BLDBIN):$$PATH" \
 	  ./configure \
 		--target=$(STDARCH)-unikraft-ocaml \
-		--prefix=$(call SHQUOTE,$(prefix)/lib/$(OCAMLPKG)) \
+		--prefix="$$OCUKPREFIX/lib/$(OCAMLPKG)" \
 		--disable-shared \
 		--disable-ocamldoc \
 		--without-zstd \
@@ -303,7 +308,7 @@ ocaml/Makefile.config: $(TOOLCHAIN) | ocaml
 $(OCAMLBUILT): ocaml/Makefile.config | _build
 	PATH="$$PWD/$(BLDBIN):$$PATH" \
 	  $(MAKE) -C ocaml crossopt \
-	    prefix=$(call SHQUOTE,$(prefix)/lib/$(OCAMLPKG)) \
+	    prefix=$(OCUKPREFIX)/lib/$(OCAMLPKG) \
 	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex" \
 	    $$(case "$$(ocamlc -vnum)" in \
 	         5.5.*) echo LIBDIR=../lib/ocaml ;; \
@@ -312,7 +317,7 @@ $(OCAMLBUILT): ocaml/Makefile.config | _build
 
 OCAMLFIND_CONF := _build/unikraft_$(OCUKARCH).conf
 $(OCAMLFIND_CONF): gen_ocamlfind_conf.sh $(OCAMLBUILT)
-	./gen_ocamlfind_conf.sh $(OCUKARCH) "$(prefix)" > $@
+	./gen_ocamlfind_conf.sh $(OCUKARCH) $(OCUKPREFIX) > $@
 
 .PHONY: compiler
 compiler: $(OCAMLBUILT) $(OCAMLFIND_CONF) _build/empty
@@ -324,7 +329,7 @@ compiler: $(OCAMLBUILT) $(OCAMLFIND_CONF) _build/empty
 # This assumes that the OCaml compiler has been installed, as it will ensure it
 # can find the compiler where it is expected within $(prefix)
 _build/unikraft.conf: | _build
-	./gen_ocamlfind_conf.sh default $(OCUKARCH) "$(prefix)" > $@
+	./gen_ocamlfind_conf.sh default $(OCUKARCH) $(OCUKPREFIX) > $@
 
 # INSTALL
 ###########
@@ -385,7 +390,7 @@ localbuild: compiler
 	$(MAKE) install-ocaml
 	$(MAKE) _build/unikraft.conf
 	@echo 'Now run:'
-	@echo '  export PATH="$(prefix)/bin:$$PATH";' \
+	@echo '  export PATH='$(OCUKPREFIX)'/bin:"$$PATH";' \
 	    'export OCAMLFIND_CONF="$$PWD/_build/unikraft.conf"'
 	@echo 'in your shell session to be able to use the unikraft toolchain.'
 
