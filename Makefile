@@ -260,6 +260,7 @@ TOOLCHAIN := $(foreach tool,$(TOOLCHAIN),$(STDARCH)-unikraft-ocaml-$(tool))
 BLDTOOLCHAIN := $(addprefix $(BLDBIN)/,$(TOOLCHAIN))
 TOOLCHAIN := $(addprefix $(BIN)/,$(TOOLCHAIN))
 BLDTOOLCHK := $(BLDLIB)/$(TOOLCHAINPKG)/include/ocaml-unikraft-version-check.h
+TOOLCHK := $(LIB)/$(TOOLCHAINPKG)/include/ocaml-unikraft-version-check.h
 
 $(BLDBIN)/$(STDARCH)-unikraft-ocaml-%: gen_toolchain_tool.sh $(CONFIGFILES) \
     | $(BLDBIN)
@@ -291,7 +292,7 @@ ocaml:
 
 # We add $(BLDBIN) inconditionnally, even when using the installed toolchain: as
 # the $(BLDBIN) directory should not be built, it will just be ignored
-ocaml/Makefile.config: $(TOOLCHAIN) | ocaml
+ocaml/Makefile.config: $(TOOLCHAIN) $(TOOLCHK) | ocaml
 	cd ocaml && \
 	  PATH="$$PWD/../$(BLDBIN):$$PATH" \
 	  ./configure \
