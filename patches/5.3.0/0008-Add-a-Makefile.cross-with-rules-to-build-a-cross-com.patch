@@ -89,10 +89,10 @@ index 0000000000..c30d2e2b4f
 +	$(MAKE) -C otherlibs all $(CROSS_OVERRIDES)
 +	$(MAKE) runtimeopt
 +	$(MAKE) ocamlc.opt ocamlopt.opt $(TOOLS_NATIVE_TARGETS) \
-+	  $(CROSS_COMPILER_OVERRIDES) "$(HOST_ZSTD_LIBS)"
++	  $(CROSS_COMPILER_OVERRIDES) OC_NATIVE_COMPFLAGS= "$(HOST_ZSTD_LIBS)"
 +	$(MAKE) libraryopt $(CROSS_OVERRIDES)
 +	$(MAKE) otherlibrariesopt ocamltoolsopt $(CROSS_OVERRIDES)
-+	$(MAKE) tools-allopt.opt $(CROSS_COMPILER_OVERRIDES)
++	$(MAKE) tools-allopt.opt $(CROSS_COMPILER_OVERRIDES) OC_NATIVE_COMPFLAGS=
 +	# We now build the compiler libs again, but for target this time
 +	rm -f $(ocamlcommon_NCOBJS) $(ocamlmiddleend_NCOBJS) \
 +	  $(ocamlbytecomp_NCOBJS) $(ocamloptcomp_NCOBJS) \
