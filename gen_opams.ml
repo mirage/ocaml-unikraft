@@ -389,7 +389,7 @@ description:
 authors: "Samuel Hym"
 license: ["MIT" "LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception"]
 depends: [
-  "ocaml" {>= "5.3.0" & <= "5.5.0"}
+  "ocaml" {>= "5.3.0" & < "5.6.0~"}
   "ocaml-unikraft-toolchain-%s" {>= "%s" & < "%s"}
   "ocamlfind"
   "ocaml-src" {build}
