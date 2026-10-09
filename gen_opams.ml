@@ -154,6 +154,7 @@ install: [
   ["rm" "-rf" ".github" ".gitignore"]
   ["cp" "-r" "." "%%{_:lib}%%"]
 ]
+remove: [ ["rm" "-rf" "%%{_:lib}%%"] ]
 dev-repo: "git+https://github.com/unikraft/unikraft.git"
 url {
   src:
@@ -196,6 +197,7 @@ install: [
   ["rm" "-rf" ".github"]
   ["cp" "-r" "." "%%{_:lib}%%"]
 ]
+remove: [ ["rm" "-rf" "%%{_:lib}%%"] ]
 dev-repo: "git+https://github.com/unikraft/lib-musl.git"
 url {
   src:
