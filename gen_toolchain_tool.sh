@@ -98,6 +98,10 @@ EOF
       printf ')\n    LIBDIR="$basedir/lib/%s"\n' "${b##*/}"
       printf '    set -- \\\n      -D __Unikraft__ \\\n'
       cat "$b"/cflags
+      # Check that the C compiler (major) version so that the following -isystem
+      # is still valid
+      printf '      -include "$basedir/lib/ocaml-unikraft-toolchain-%s/%s" \\\n' \
+        "$ARCH" include/ocaml-unikraft-version-check.h
       # Access the compiler base headers, such as x86intrin.h, if needed
       printf '      -isystem %s \\\n' "${includedir@Q}"
       printf '      -static \\\n'

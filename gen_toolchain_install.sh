@@ -4,8 +4,8 @@
 # Copyright (c) 2025 Samuel Hym, Tarides <samuel@tarides.com>
 
 # Generate a .install file for the toolchain
-# Takes as arguments the architecture (x86_64 or arm64) followed by all the
-# toolchain tools
+# Takes as arguments the architecture (x86_64 or arm64) followed by the
+# compiler-check header and all the toolchain tools
 
 ARCH="$1"
 shift
@@ -20,6 +20,10 @@ install_file() {
 }
 
 main() {
+  printf 'lib: [\n'
+  install_file "$1" "include/ocaml-unikraft-version-check.h"
+  printf ']\n'
+  shift
   printf '%s: [\n' bin
   for f in "$@"; do
     install_file "$f"

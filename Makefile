@@ -263,14 +263,20 @@ TOOLCHAIN := gcc cc ar as ld nm objcopy objdump ranlib readelf strip
 TOOLCHAIN := $(foreach tool,$(TOOLCHAIN),$(STDARCH)-unikraft-ocaml-$(tool))
 BLDTOOLCHAIN := $(addprefix $(BLDBIN)/,$(TOOLCHAIN))
 TOOLCHAIN := $(addprefix $(BIN)/,$(TOOLCHAIN))
+BLDTOOLCHK := $(BLDLIB)/$(TOOLCHAINPKG)/include/ocaml-unikraft-version-check.h
+TOOLCHK := $(LIB)/$(TOOLCHAINPKG)/include/ocaml-unikraft-version-check.h
 
 $(BLDBIN)/$(STDARCH)-unikraft-ocaml-%: gen_toolchain_tool.sh $(CONFIGFILES) \
     | $(BLDBIN)
 	./gen_toolchain_tool.sh $(OCUKARCH) $(SHARE) $* > $@
 	chmod +x $@
 
+$(BLDTOOLCHK): gen_toolchain_check.sh $(CONFIGFILES) \
+    | $(BLDLIB)/$(TOOLCHAINPKG)/include
+	./gen_toolchain_check.sh $(OCUKARCH) $(SHARE) > $@
+
 .PHONY: toolchain
-toolchain: $(BLDTOOLCHAIN)
+toolchain: $(BLDTOOLCHK) $(BLDTOOLCHAIN)
 
 
 # OCAML COMPILER
@@ -290,7 +296,7 @@ ocaml:
 
 # We add $(BLDBIN) inconditionnally, even when using the installed toolchain: as
 # the $(BLDBIN) directory should not be built, it will just be ignored
-ocaml/Makefile.config: $(TOOLCHAIN) | ocaml
+ocaml/Makefile.config: $(TOOLCHAIN) $(TOOLCHK) | ocaml
 	OCUKPREFIX=$(OCUKPREFIX) ; \
 	cd ocaml && \
 	  PATH="$$PWD/../$(BLDBIN):$$PATH" \
@@ -339,8 +345,8 @@ $(BACKENDPKG).install: gen_backend_install.sh $(BACKENDBUILT) \
 	./gen_backend_install.sh $(OCUKPLAT)-$(OCUKARCH) > $@
 
 ocaml-unikraft-toolchain-$(OCUKARCH).install: gen_toolchain_install.sh \
-    $(BLDTOOLCHAIN)
-	./gen_toolchain_install.sh $(OCUKARCH) $(BLDTOOLCHAIN) > $@
+    $(BLDTOOLCHK) $(BLDTOOLCHAIN)
+	./gen_toolchain_install.sh $(OCUKARCH) $(BLDTOOLCHK) $(BLDTOOLCHAIN) >$@
 
 ocaml-unikraft-$(OCUKARCH).install: gen_dot_install.sh \
     $(OCAMLFIND_CONF) _build/empty
