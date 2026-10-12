@@ -13,6 +13,8 @@ STDARCH := $(subst arm64,aarch64,$(OCUKARCH))
 OCUKEXTLIBS ?= musl
 # Options for the configuration (available options: debug, 9pfs)
 OCUKCONFIGOPTS ?=
+# Extra flags for OCaml configure
+OCUKEXTRACONFIGUREFLAGS ?=
 # Shell-quoted installation prefix for OCaml
 # Note that it is meant to be interpreted in the current directory ($PWD) in the
 # second case, which matters in the rules that build the OCaml compiler in the
@@ -310,7 +312,8 @@ ocaml/Makefile.config: $(TOOLCHAIN) $(TOOLCHK) | ocaml
 		--with-additional-stublibsdir \
 		--with-relative-libdir \
 		--enable-runtime-search \
-		--enable-runtime-search-target
+		--enable-runtime-search-target \
+		$(OCUKEXTRACONFIGUREFLAGS)
 
 $(OCAMLBUILT): ocaml/Makefile.config | _build
 	case "$$(ocamlc -vnum)" in \
