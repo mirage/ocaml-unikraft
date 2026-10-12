@@ -313,13 +313,14 @@ ocaml/Makefile.config: $(TOOLCHAIN) $(TOOLCHK) | ocaml
 		--enable-runtime-search-target
 
 $(OCAMLBUILT): ocaml/Makefile.config | _build
+	case "$$(ocamlc -vnum)" in \
+	  5.5.*) fix_reloc=LIBDIR=../lib/ocaml ;; \
+	  *) fix_reloc= ;; \
+	esac ; \
 	PATH="$$PWD/$(BLDBIN):$$PATH" \
-	  $(MAKE) -C ocaml crossopt \
+	  $(MAKE) -C ocaml crossopt $$fix_reloc \
 	    prefix=$(OCUKPREFIX)/lib/$(OCAMLPKG) \
-	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex" \
-	    $$(case "$$(ocamlc -vnum)" in \
-	         5.5.*) echo LIBDIR=../lib/ocaml ;; \
-	       esac)
+	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex"
 	touch $@
 
 OCAMLFIND_CONF := _build/unikraft_$(OCUKARCH).conf
