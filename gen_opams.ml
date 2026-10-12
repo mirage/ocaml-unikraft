@@ -117,8 +117,7 @@ tags: "org:mirage"|};
             src checksum);
       if !repository_layout then
         Printf.fprintf out
-          {|available: os = "linux"
-x-maintenance-intent: ["(latest)"]
+          {|x-maintenance-intent: ["(latest)"]
 |})
 
 let unikraft_package () =
@@ -161,10 +160,6 @@ url {
   checksum:
     "sha256=f1e97df806acbd1a0a31ce4ca385e44ab65a1732c92199bd9ef50de4ceca7c76"
 }
-available:
-  os = "linux" &
-  (arch = "arm64" | arch = "x86_64" | arch = "s390x" | arch = "riscv64" |
-   arch = "ppc64")
 x-maintenance-intent: ["(latest)"]
 |})
 
@@ -290,7 +285,7 @@ license: ["MIT" "BSD-3-Clause" "GPL-2.0-only"]
 depends: [
   "unikraft" {= "%s"}
   "unikraft-musl" {= "%s"}
-  "conf-%s-linux-gnu-gcc" {arch != "%s"}
+  "conf-%s-linux-gnu-gcc" {arch != "%s" | os != "linux" }
 ]
 depopts: [|}
         long_name arch version_unikraft_base version_unikraft_base
@@ -317,11 +312,12 @@ build: [
     "OCUKCUSTOMCFGDIR=%%{ocaml-unikraft-custom-configs:share}%%"
       {ocaml-unikraft-custom-configs:installed}
     "UK_CFLAGS=-std=gnu11"
+    "CROSS_COMPILE=%s-linux-gnu-" {os != "linux"}
     "%%{name}%%.install"
   ]
 ]
 |}
-        short_name arch;
+        short_name arch (prefix_arch arch);
       if !repository_layout then
         Printf.fprintf out
           {|x-ci-accept-failures: [
@@ -404,6 +400,8 @@ build: [
     "LIB=%%{lib}%%"
     "SHARE=%%{share}%%"
     "OCUKARCH=%s"
+    "OCUKEXTRACONFIGUREFLAGS=--disable-function-sections"
+      { os = "cygwin" | os = "windows" | os = "macos" }
     "%%{name}%%.install"
   ]
 ]
