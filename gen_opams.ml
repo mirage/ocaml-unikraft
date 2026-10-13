@@ -153,6 +153,10 @@ install: [
   ["rm" "-rf" ".github" ".gitignore"]
   ["cp" "-r" "." "%%{_:lib}%%"]
 ]
+depexts: [
+  [ "make" "gnu-sed" "coreutils" "grep" ]
+    {os = "macos" & os-distribution = "homebrew"}
+]
 dev-repo: "git+https://github.com/unikraft/unikraft.git"
 url {
   src:
@@ -300,7 +304,8 @@ depopts: [|}
 ]
 build: [
   [
-    make
+    make {os != "macos"}
+    "gmake" {os = "macos"}
     "-j%%{jobs}%%"
     "UNIKRAFT=%%{unikraft:lib}%%"
     "UNIKRAFTMUSL=%%{unikraft-musl:lib}%%"

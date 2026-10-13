@@ -22,7 +22,8 @@ depopts: [
 ]
 build: [
   [
-    make
+    make {os != "macos"}
+    "gmake" {os = "macos"}
     "-j%{jobs}%"
     "UNIKRAFT=%{unikraft:lib}%"
     "UNIKRAFTMUSL=%{unikraft-musl:lib}%"
