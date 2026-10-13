@@ -103,7 +103,7 @@ EOF
       printf '      -include "$basedir/lib/ocaml-unikraft-toolchain-%s/%s" \\\n' \
         "$ARCH" include/ocaml-unikraft-version-check.h
       # Access the compiler base headers, such as x86intrin.h, if needed
-      printf '      -isystem %s \\\n' "${includedir@Q}"
+      printf '      -isystem %q \\\n' "$includedir"
       printf '      -static \\\n'
       printf '      "$@" \\\n'
       # Disable warnings due to musl code
