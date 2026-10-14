@@ -28,6 +28,8 @@ build: [
     "LIB=%{lib}%"
     "SHARE=%{share}%"
     "OCUKARCH=x86_64"
+    "OCUKEXTRACONFIGUREFLAGS=--disable-function-sections"
+      { os = "cygwin" | os = "windows" | os = "macos" }
     "%{name}%.install"
   ]
 ]
