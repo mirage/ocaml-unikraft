@@ -66,6 +66,8 @@ all: compiler
 # UNIKRAFT CONFIGURATION
 ##########################
 
+OCUKEXTLIBSDEPS := $(addprefix _build/libs/,$(OCUKEXTLIBS))
+
 # The suffix has the form `-liba+libb+libc-optx+opty`
 CONFIG_SUFFIX := \
    $(subst $(SPACE),,\
@@ -145,7 +147,6 @@ LIBMUSL := _build/libs/musl
 MUSLARCHIVE := $(wildcard $(UNIKRAFTMUSL)/musl-*.tar.gz)
 MUSLARCHIVEPATH := $(BEBLDLIBDIR)/libmusl/$(notdir $(MUSLARCHIVE))
 
-OCUKEXTLIBSDEPS := $(addprefix _build/libs/,$(OCUKEXTLIBS))
 OCUKEXTLIBSARCHIVES :=
 ifneq ("$(findstring musl,$(OCUKEXTLIBS))","")
 OCUKEXTLIBSARCHIVES := $(OCUKEXTLIBSARCHIVES) $(MUSLARCHIVEPATH)
