@@ -10,7 +10,7 @@ let version_ocaml_unikraft = "1.2.0"
 let bound_ocaml_unikraft = "1.2.1"
 
 (* Version for the Unikraft sources *)
-let version_unikraft_base = "0.20.0"
+let version_unikraft_base = "0.21.0"
 
 (* Version for the OCaml/Unikraft backend, etc. packages *)
 let version_unikraft_full = version_ocaml_unikraft ^ "-" ^ version_unikraft_base
