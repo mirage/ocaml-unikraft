@@ -15,7 +15,6 @@ permissions: {}
 jobs:
   test:
     name: Run examples on both architectures
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -23,9 +22,16 @@ jobs:
           - ocukver: dev
             ukver: dev
             ocver: 5.4.0
+            runner: ubuntu-latest
           - ocukver: dev
             ukver: dev
             ocver: 5.5.1
+            runner: ubuntu-latest
+          - ocukver: dev
+            ukver: dev
+            ocver: 5.5.1
+            runner: macos-latest
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -55,7 +61,7 @@ jobs:
           opam-pin: false
       - name: Pin Unikraft packages
         run: |
-          opam pin add -yn "https://github.com/mirage/unikraft.git#${UKVER#*-}+mirage"
+          opam pin add -yn "https://github.com/mirage/unikraft.git#relax"
           opam pin add -yn "https://github.com/mirage/unikraft-lib-musl.git#${UKVER#*-}+mirage"
           opam pin add -yn ocaml-unikraft-backend-firecracker.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker-arm64.$UKVER .
@@ -77,9 +83,25 @@ jobs:
           opam pin add -yn ocaml-unikraft-x86_64.$OCUKVER .
         if: ${{ matrix.ocukver == 'dev' }}
       - name: Install extra packages
+        env:
+          OS: ${{ runner.os }}
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y qemu-system-x86 qemu-system-arm
+          case "$OS" in
+            Linux)
+              sudo apt-get update -y
+              sudo apt-get install -y qemu-system-x86 qemu-system-arm
+              ;;
+            macOS)
+              brew tap messense/macos-cross-toolchains
+              # In CI with no permissions, let’s trust it
+              brew trust messense/macos-cross-toolchains
+              brew install qemu x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
+              ;;
+            *)
+              echo "Unexpected value for OS: $OS"
+              exit 1
+              ;;
+          esac
           opam install dune
       - name: Install arch-specific packages
         run: |
@@ -92,9 +114,11 @@ jobs:
             ocaml-unikraft-backend-firecracker-arm64.$UKVER
       - name: Show configuration
         run: |
+          set -x
           opam exec -- ocamlc -config
           opam config list
           opam list
+          opam exec -- sh -c 'cat "$(which x86_64-unikraft-ocaml-cc)"'
       - name: Install default packages
         run: |
           opam install                            \
@@ -127,6 +151,7 @@ jobs:
           mkdir -p "$HOME/.local/bin"
           mv "release-v$FCVER-x86_64/firecracker-v$FCVER-x86_64" "$HOME/.local/bin/firecracker"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        if: ${{ runner.os == 'Linux' }}
       - name: Test examples with Firecracker
         run: |
           cd examples/all/
@@ -141,6 +166,7 @@ jobs:
           opam exec -- dune build @test-sleeper
           sudo setfacl -m u:${USER}:rw /dev/kvm
           opam exec -- dune build @test-threader
+        if: ${{ runner.os == 'Linux' }}
 
   mirage:
     name: Build and test MirageOS unikernels

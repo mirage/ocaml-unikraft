@@ -13,6 +13,8 @@ STDARCH := $(subst arm64,aarch64,$(OCUKARCH))
 OCUKEXTLIBS ?= musl
 # Options for the configuration (available options: debug, 9pfs)
 OCUKCONFIGOPTS ?=
+# Extra flags for OCaml configure
+OCUKEXTRACONFIGUREFLAGS ?=
 # Shell-quoted installation prefix for OCaml
 # Note that it is meant to be interpreted in the current directory ($PWD) in the
 # second case, which matters in the rules that build the OCaml compiler in the
@@ -310,16 +312,18 @@ ocaml/Makefile.config: $(TOOLCHAIN) $(TOOLCHK) | ocaml
 		--with-additional-stublibsdir \
 		--with-relative-libdir \
 		--enable-runtime-search \
-		--enable-runtime-search-target
+		--enable-runtime-search-target \
+		$(OCUKEXTRACONFIGUREFLAGS)
 
 $(OCAMLBUILT): ocaml/Makefile.config | _build
+	case "$$(ocamlc -vnum)" in \
+	  5.5.*) fix_reloc=LIBDIR=../lib/ocaml ;; \
+	  *) fix_reloc= ;; \
+	esac ; \
 	PATH="$$PWD/$(BLDBIN):$$PATH" \
-	  $(MAKE) -C ocaml crossopt \
+	  $(MAKE) -C ocaml crossopt $$fix_reloc \
 	    prefix=$(OCUKPREFIX)/lib/$(OCAMLPKG) \
-	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex" \
-	    $$(case "$$(ocamlc -vnum)" in \
-	         5.5.*) echo LIBDIR=../lib/ocaml ;; \
-	       esac)
+	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex"
 	touch $@
 
 OCAMLFIND_CONF := _build/unikraft_$(OCUKARCH).conf
