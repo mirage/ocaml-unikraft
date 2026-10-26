@@ -117,7 +117,7 @@ tags: "org:mirage"|};
             src checksum);
       if !repository_layout then
         Printf.fprintf out
-          {|available: os = "linux"
+          {|available: os = "linux" | os = "macos"
 x-maintenance-intent: ["(latest)"]
 |})
 
@@ -162,7 +162,7 @@ url {
     "sha256=f1e97df806acbd1a0a31ce4ca385e44ab65a1732c92199bd9ef50de4ceca7c76"
 }
 available:
-  os = "linux" &
+  (os = "linux" | os = "macos") &
   (arch = "arm64" | arch = "x86_64" | arch = "s390x" | arch = "riscv64" |
    arch = "ppc64")
 x-maintenance-intent: ["(latest)"]
@@ -317,11 +317,12 @@ build: [
     "OCUKCUSTOMCFGDIR=%%{ocaml-unikraft-custom-configs:share}%%"
       {ocaml-unikraft-custom-configs:installed}
     "UK_CFLAGS=-std=gnu11"
+    "CROSS_COMPILE=%s-linux-gnu-" {os = "macos"}
     "%%{name}%%.install"
   ]
 ]
 |}
-        short_name arch;
+        short_name arch (prefix_arch arch);
       if !repository_layout then
         Printf.fprintf out
           {|x-ci-accept-failures: [

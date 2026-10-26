@@ -310,16 +310,15 @@ ocaml/Makefile.config: $(TOOLCHAIN) $(TOOLCHK) | ocaml
 		--with-additional-stublibsdir \
 		--with-relative-libdir \
 		--enable-runtime-search \
-		--enable-runtime-search-target
+		--enable-runtime-search-target \
+		$(OCAMLCONFIGUREEXTRA)
 
 $(OCAMLBUILT): ocaml/Makefile.config | _build
 	PATH="$$PWD/$(BLDBIN):$$PATH" \
 	  $(MAKE) -C ocaml crossopt \
 	    prefix=$(OCUKPREFIX)/lib/$(OCAMLPKG) \
 	    OLDS="-o yacc/ocamlyacc -o lex/ocamllex" \
-	    $$(case "$$(ocamlc -vnum)" in \
-	         5.5.*) echo LIBDIR=../lib/ocaml ;; \
-	       esac)
+	    $$(ocamlc -vnum | grep -qE '^5[.]5[.]' && echo LIBDIR=../lib/ocaml)
 	touch $@
 
 OCAMLFIND_CONF := _build/unikraft_$(OCUKARCH).conf
