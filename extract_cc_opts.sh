@@ -30,6 +30,12 @@ maybe_inject_placeholder() {
   fi
 }
 
+quote_unescape() {
+  sed -e "s/'/'\\\\''/g" \
+    -e 's/__builddir_temporary_placeholder__/'\''"${LIBDIR}"'\''/g' \
+    -e 's/__unikraftdir_temporary_placeholder__/'\''"${UKLIBDIR}"'\''/g'
+}
+
 # Process one option: quote so that it can be fed back to another shell and
 # replace the UNIKRAFTDIR and BUILDDIR directories with variables, so that it
 # can be interpreted on the fly
@@ -41,15 +47,7 @@ process_option() {
   opt="${opt//"$REALUKLIBSDIR"/__builddir_temporary_placeholder__}"
   opt="${opt//"$UNIKRAFTDIR"/__unikraftdir_temporary_placeholder__}"
   opt="${opt//"$REALUNIKRAFTDIR"/__unikraftdir_temporary_placeholder__}"
-  qopt="${opt@Q}"
-  # Check that it was quoted using the form '...', as we will assume it was when
-  # injecting the variables; if that's not the case, do it using sed
-  if [ -n "${qopt##\'*\'}" ]; then
-    qopt="'$(printf %s "$opt" | sed "s/'/'\\\\''/g")'"
-  fi
-  qopt="${qopt//__builddir_temporary_placeholder__/\'\"\$\{LIBDIR\}\"\'}"
-  qopt="${qopt//__unikraftdir_temporary_placeholder__/\'\"\$\{UKLIBDIR\}\"\'}"
-  printf '      %s \\\n' "$qopt"
+  printf '      %s \\\n' "'$(printf %s "$opt" | quote_unescape)'"
 }
 
 # Compilation options, extracted from the commandline for dummymain.o
