@@ -1,9 +1,19 @@
 name: Build and test
 
+# The "ci-**" case below means it’s possible to trigger CI by pushing on a
+# branch named ci-XYZ. In that case, the branches of unikraft and
+# unikraft-lib-musl that will be pinned are XYZ+mirage.
+#
+# In all cases, the forks of unikraft and unikraft-lib-musl selected will be
+# from the same owner than the repository where the workflow is triggered, so
+# that it’s easier for external contributors to use that workflow in their
+# forks.
+
 on:
   push:
     branches:
       - main
+      - "ci-**"
   pull_request:
 
 env:
@@ -33,6 +43,7 @@ jobs:
         env:
           OCUKVER: ${{ matrix.ocukver }}
           UKVER: ${{ matrix.ukver }}
+          REF: ${{ github.ref }}
         run: |
           # OCaml/Unikraft version number
           V="$(awk '/^let version_o/ {gsub(/"/,"");print $4;}' gen_opams.ml)"
@@ -43,9 +54,20 @@ jobs:
             gen_opams.ml)"
           [[ "$UKVER" = dev ]] && UKVER="$V-$U"
           printf 'UKVER=%s\n' "$UKVER" >> "$GITHUB_ENV"
+          # Unikraft and lib-musl branches to pull (only when we are triggered
+          # on a push of a ci-* branch, and it will be used only when UKVER is
+          # dev)
+          case "$REF" in
+            refs/heads/ci-*)
+              B="${REF#refs/heads/ci-}+mirage"
+              ;;
+            *)
+              B="${UKVER#*-}+mirage"
+              ;;
+          esac
+          printf 'UKBRANCH=%s\n' "$B" >> "$GITHUB_ENV"
           # Log
-          printf 'Dev versions:\n- OCaml/Unikraft: %s\n- Unikraft: %s\n' \
-            "$V" "$U"
+          printf 'OCaml/Unikraft: %s\nUnikraft: %s\nBranch: %s\n' "$V" "$U" "$B"
       - name: Install OCaml compiler
         uses: ocaml/setup-ocaml@v3
         with:
@@ -54,9 +76,11 @@ jobs:
           # satisfy the dependency bounds of the other packages
           opam-pin: false
       - name: Pin Unikraft packages
+        env:
+          OWNER: ${{ github.repository_owner }}
         run: |
-          opam pin add -yn "https://github.com/mirage/unikraft.git#${UKVER#*-}+mirage"
-          opam pin add -yn "https://github.com/mirage/unikraft-lib-musl.git#${UKVER#*-}+mirage"
+          opam pin add -yn "https://github.com/$OWNER/unikraft.git#$UKBRANCH"
+          opam pin add -yn "https://github.com/$OWNER/unikraft-lib-musl.git#$UKBRANCH"
           opam pin add -yn ocaml-unikraft-backend-firecracker.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker-arm64.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-firecracker-x86_64.$UKVER .
@@ -153,6 +177,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Read the version number from gen_opams.ml
+        env:
+          REF: ${{ github.ref }}
         run: |
           # OCaml/Unikraft version number
           V="$(awk '/^let version_o/ {gsub(/"/,"");print $4;}' gen_opams.ml)"
@@ -161,6 +187,18 @@ jobs:
           U="$(awk '/^let version_unikraft_base/ {gsub(/"/,"");print $4;}' \
             gen_opams.ml)"
           printf 'UKVER=%s\n' "$V-$U" >> "$GITHUB_ENV"
+          # Unikraft and lib-musl branches to pull
+          case "$REF" in
+            refs/heads/ci-*)
+              B="${REF#refs/heads/ci-}+mirage"
+              ;;
+            *)
+              B="$U+mirage"
+              ;;
+          esac
+          printf 'UKBRANCH=%s\n' "$B" >> "$GITHUB_ENV"
+          # Log
+          printf 'OCaml/Unikraft: %s\nUnikraft: %s\nBranch: %s\n' "$V" "$U" "$B"
       - name: Checkout skeleton code
         uses: actions/checkout@v6
         with:
@@ -176,9 +214,11 @@ jobs:
           # satisfy the dependency bounds of the other packages
           opam-pin: false
       - name: Pin necessary packages
+        env:
+          OWNER: ${{ github.repository_owner }}
         run: |
-          opam pin add -yn "https://github.com/mirage/unikraft.git#${UKVER#*-}+mirage"
-          opam pin add -yn "https://github.com/mirage/unikraft-lib-musl.git#${UKVER#*-}+mirage"
+          opam pin add -yn "https://github.com/$OWNER/unikraft.git#$UKBRANCH"
+          opam pin add -yn "https://github.com/$OWNER/unikraft-lib-musl.git#$UKBRANCH"
           opam pin add -yn ocaml-unikraft-backend-qemu-x86_64.$UKVER .
           opam pin add -yn ocaml-unikraft-backend-qemu.$UKVER .
           opam pin add -yn ocaml-unikraft-default-x86_64.$OCUKVER .
