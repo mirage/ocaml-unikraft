@@ -216,6 +216,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-system-x86
+      - name: Grant universal access to KVM
+        run: |
+          echo 'KERNEL=="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | \
+            sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
       - name: Test network skeleton
         run: |
           set -x
@@ -238,8 +244,8 @@ jobs:
             case "$r1,$r2" in                           \
               52,52) echo "echo Success; true" > res ;; \
             esac ) &
-          qemu-system-x86_64 -nographic -nodefaults -serial stdio -machine q35 \
-            -cpu "qemu64,-vmx,-svm,+x2apic,+pdpe1gb,+rdrand,+rdseed" -m 1G     \
+          qemu-system-x86_64 -nographic -nodefaults -serial stdio              \
+            -cpu host --enable-kvm -m 1G                                       \
             -netdev tap,id=hnet0,ifname=tap0,vhost=off,script=no,downscript=no \
             -device virtio-net-pci,netdev=hnet0,id=net0                        \
             -kernel dist/network.qemu                                          \
@@ -261,8 +267,8 @@ jobs:
           set -x
           cd skeleton/device-usage/block/
           head -c 100000 /dev/zero > disk.img
-          qemu-system-x86_64 -nographic -nodefaults -serial stdio -machine q35 \
-            -cpu "qemu64,-vmx,-svm,+x2apic,+pdpe1gb,+rdrand,+rdseed" -m 1G     \
-            -drive file=disk.img,if=virtio,id=hvirtio0,format=raw              \
-            -device isa-debug-exit -kernel dist/block_test.qemu                \
+          qemu-system-x86_64 -nographic -nodefaults -serial stdio \
+            -cpu host --enable-kvm -m 1G                          \
+            -drive file=disk.img,if=virtio,id=hvirtio0,format=raw \
+            -device isa-debug-exit -kernel dist/block_test.qemu   \
           || [ $? = 83 ]
