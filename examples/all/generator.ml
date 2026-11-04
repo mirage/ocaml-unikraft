@@ -144,8 +144,7 @@ let gen_firecracker_config () =
 
 let gen_qemu_call target =
   let pr = List.iter print_endline in
-  let same_arch = Config.architecture = target
-  and force_emulation = Sys.getenv_opt "CI" = Some "true" in
+  let same_arch = Config.architecture = target and force_emulation = false in
   (match target with
   | "amd64" -> pr [ "qemu-system-x86_64"; "-device"; "isa-debug-exit" ]
   | "arm64" -> pr [ "qemu-system-aarch64" ]
