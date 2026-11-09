@@ -160,7 +160,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
         if: ${{ runner.os == 'Linux' }}
-      - name: Test examples
+      - name: Test examples with aarch64 QEMU
         run: |
           cd examples/simple/
           opam exec -- dune build
@@ -172,18 +172,18 @@ jobs:
       - name: Show configuration
         run: |
           opam exec -- ocamlfind -toolchain unikraft ocamlc -config -verbose
-      - name: Test examples with QEMU
+      - name: Test examples with x86_64 QEMU
         run: |
           cd examples/all/
           opam exec -- dune runtest -f _build/unikraft
-      - name: Install Firecracker
+      - name: Install x86_64 Firecracker
         run: |
           wget -q -O- "https://github.com/firecracker-microvm/firecracker/releases/download/v$FCVER/firecracker-v$FCVER-x86_64.tgz" | tar xvz
           mkdir -p "$HOME/.local/bin"
           mv "release-v$FCVER-x86_64/firecracker-v$FCVER-x86_64" "$HOME/.local/bin/firecracker"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
         if: ${{ runner.os == 'Linux' }}
-      - name: Test examples with Firecracker
+      - name: Test examples with x86_64 Firecracker
         run: |
           cd examples/all/
           export UNIKRAFTBACKEND=firecracker
