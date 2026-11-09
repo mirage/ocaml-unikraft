@@ -144,15 +144,17 @@ let gen_firecracker_config () =
 
 let gen_qemu_call target =
   let pr = List.iter print_endline in
-  let same_arch = Config.architecture = target and force_emulation = false in
+  let enable_kvm opts =
+    if Config.system = "linux" then "--enable-kvm" :: opts else opts
+  and force_emulation = Config.architecture <> target in
   (match target with
   | "amd64" -> pr [ "qemu-system-x86_64"; "-device"; "isa-debug-exit" ]
   | "arm64" -> pr [ "qemu-system-aarch64" ]
   | _ -> failwith ("Unsupported target architecture: " ^ target));
-  match (target, same_arch, force_emulation) with
-  | "amd64", true, false | "arm64", true, false ->
-      pr [ "-cpu"; "host"; "--enable-kvm" ]
-  | "amd64", _, _ ->
+  match (target, force_emulation) with
+  | "amd64", false -> pr (enable_kvm [ "-cpu"; "host" ])
+  | "arm64", false -> pr (enable_kvm [ "-cpu"; "host"; "-machine"; "virt" ])
+  | "amd64", _ ->
       pr
         [
           "-machine";
@@ -163,7 +165,7 @@ let gen_qemu_call target =
              launch QEMU, but it is not supported in CI and not used in our
              simple examples so it isn’t enabled here *)
         ]
-  | "arm64", _, _ -> pr [ "-machine"; "virt"; "-cpu"; "cortex-a72" (* "max" *) ]
+  | "arm64", _ -> pr [ "-machine"; "virt"; "-cpu"; "cortex-a72" (* "max" *) ]
   | _ -> assert false (* as we would have failed before *)
 
 let usage () =
