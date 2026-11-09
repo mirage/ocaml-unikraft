@@ -187,16 +187,7 @@ jobs:
         run: |
           cd examples/all/
           export UNIKRAFTBACKEND=firecracker
-          sudo setfacl -m u:${USER}:rw /dev/kvm
-          opam exec -- dune build @test-args
-          sudo setfacl -m u:${USER}:rw /dev/kvm
-          opam exec -- dune build @test-fail
-          sudo setfacl -m u:${USER}:rw /dev/kvm
-          opam exec -- dune build @test-hello
-          sudo setfacl -m u:${USER}:rw /dev/kvm
-          opam exec -- dune build @test-sleeper
-          sudo setfacl -m u:${USER}:rw /dev/kvm
-          opam exec -- dune build @test-threader
+          opam exec -- dune runtest -f _build/unikraft
         if: ${{ runner.os == 'Linux' }}
 
   mirage:
