@@ -146,7 +146,11 @@ let gen_qemu_call target =
   let pr = List.iter print_endline in
   let enable_kvm opts =
     if Config.system = "linux" then "--enable-kvm" :: opts else opts
-  and force_emulation = Config.architecture <> target in
+  and force_emulation =
+    match (Config.architecture, Config.system) with
+    | "arm64", "macosx" -> true
+    | _ -> Config.architecture <> target
+  in
   (match target with
   | "amd64" -> pr [ "qemu-system-x86_64"; "-device"; "isa-debug-exit" ]
   | "arm64" -> pr [ "qemu-system-aarch64" ]
