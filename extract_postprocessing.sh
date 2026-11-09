@@ -27,13 +27,13 @@ process() {
         process < "${line#* }"
         ;;
       *)
-        line="${line//"$PATHTARGET"/\"\$\{TARGET\}\"}"
-        line="${line//"$REALPATHTARGET"/\"\$\{TARGET\}\"}"
-        line="${line//"$TARGETRDX"/\"\$\{TARGET\}\"}"
-        line="${line//"$BUILDDIR"/\"\$\{LIBDIR\}\"}"
-        line="${line//"$REALBUILDDIR"/\"\$\{LIBDIR\}\"}"
-        line="${line//"$UNIKRAFTDIR"/\"\$\{UKLIBDIR\}\"}"
-        line="${line//"$REALUNIKRAFTDIR"/\"\$\{UKLIBDIR\}\"}"
+        line="${line//"$PATHTARGET"/\"\$TARGET\"}"
+        line="${line//"$REALPATHTARGET"/\"\$TARGET\"}"
+        line="${line//"$TARGETRDX"/\"\$TARGET\"}"
+        line="${line//"$BUILDDIR"/\"\$LIBDIR\"}"
+        line="${line//"$REALBUILDDIR"/\"\$LIBDIR\"}"
+        line="${line//"$UNIKRAFTDIR"/\"\$UKLIBDIR\"}"
+        line="${line//"$REALUNIKRAFTDIR"/\"\$UKLIBDIR\"}"
         echo "      $line"
         ;;
     esac
