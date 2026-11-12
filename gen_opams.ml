@@ -4,10 +4,10 @@
 
 (* OCaml script to generate all the *.opam files *)
 
-let version_ocaml_unikraft = "1.2.0"
+let version_ocaml_unikraft = "1.2.1"
 
 (* The next version will be at least as much *)
-let bound_ocaml_unikraft = "1.2.1"
+let bound_ocaml_unikraft = "1.2.2"
 
 (* Version for the Unikraft sources *)
 let version_unikraft_base = "0.20.0"
